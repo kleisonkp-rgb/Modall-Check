@@ -1,0 +1,1921 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Modall Check - Inspeção Digital</title>
+  
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  
+  <!-- Google Fonts: Inter -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  
+  <!-- jsPDF & jsPDF-AutoTable via CDN -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js"></script>
+
+  <style>
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      background-color: #E0E0E0;
+      color: #212121;
+      -webkit-tap-highlight-color: transparent;
+      overscroll-behavior-y: contain;
+    }
+
+    /* Custom subtle card shadow matching the reference screenshots */
+    .modall-card {
+      background-color: #FFFFFF;
+      border-radius: 14px;
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.12);
+    }
+
+    /* Action buttons (Comentário / Foto) matching screenshot */
+    .modall-sub-btn {
+      background-color: #F4F4F4;
+      border-radius: 8px;
+      color: #424242;
+      font-weight: 600;
+      font-size: 0.875rem;
+      transition: all 0.15s ease;
+    }
+    .modall-sub-btn:active {
+      background-color: #E5E5E5;
+      transform: scale(0.98);
+    }
+
+    /* Underline input style matching screenshot */
+    .modall-underline-input {
+      border: none;
+      border-bottom: 1.5px solid #616161;
+      border-radius: 0;
+      background: transparent;
+      padding: 8px 2px;
+      width: 100%;
+      font-size: 1rem;
+      color: #111827;
+      transition: border-color 0.2s;
+    }
+    .modall-underline-input:focus {
+      outline: none;
+      border-bottom: 2px solid #00796B;
+    }
+
+    /* Status buttons default & active states */
+    .status-btn-default {
+      background-color: #8E8E8E;
+      color: #FFFFFF;
+      border-radius: 8px;
+      transition: all 0.15s ease;
+    }
+    .status-btn-default:active {
+      transform: scale(0.97);
+    }
+
+    .status-btn-conforme {
+      background-color: #2E7D32 !important;
+      color: #FFFFFF !important;
+      box-shadow: 0 3px 8px rgba(46, 125, 50, 0.35);
+    }
+
+    .status-btn-nc {
+      background-color: #C62828 !important;
+      color: #FFFFFF !important;
+      box-shadow: 0 3px 8px rgba(198, 40, 40, 0.35);
+    }
+
+    .status-btn-na {
+      background-color: #455A64 !important;
+      color: #FFFFFF !important;
+      box-shadow: 0 3px 8px rgba(69, 90, 100, 0.35);
+    }
+
+    /* Turno button states */
+    .turno-btn-default {
+      background-color: #D6D6D6;
+      color: #333333;
+      border-radius: 8px;
+      font-weight: 600;
+      transition: all 0.15s ease;
+    }
+    .turno-btn-active {
+      background-color: #00796B !important;
+      color: #FFFFFF !important;
+      box-shadow: 0 3px 8px rgba(0, 121, 107, 0.35);
+    }
+
+    /* Signature canvas touch handling */
+    .sig-canvas {
+      touch-action: none;
+      cursor: crosshair;
+      display: block;
+      width: 100%;
+      height: 140px;
+    }
+
+    /* Hide scrollbar for clean mobile feel */
+    ::-webkit-scrollbar {
+      width: 6px;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: #BDBDBD;
+      border-radius: 3px;
+    }
+  </style>
+</head>
+<body class="min-h-screen flex flex-col">
+
+  <!-- TOP HEADER BAR -->
+  <header class="sticky top-0 z-40 bg-[#00796B] text-white shadow-md">
+    <div class="max-w-xl mx-auto px-4 h-14 flex items-center justify-between">
+      <div class="flex items-center gap-3 overflow-hidden">
+        <button id="btn-back" onclick="goHome()" class="hidden p-2 -ml-2 rounded-full hover:bg-[#00695C] active:bg-[#004D40] transition" aria-label="Voltar">
+          <svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M10 19l-7-7m0 0l7-7m-7 7h18"/>
+          </svg>
+        </button>
+        <div id="header-logo" class="flex items-center gap-2">
+          <div class="w-8 h-8 rounded-lg bg-white/15 flex items-center justify-center">
+            <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+            </svg>
+          </div>
+          <h1 id="header-title" class="text-lg font-semibold tracking-tight truncate">Modall Check</h1>
+        </div>
+      </div>
+
+      <!-- Quick Fill Test Button (Visible only during form inspection) -->
+      <div id="header-actions" class="hidden flex items-center gap-1">
+        <button onclick="quickFillTest()" title="Preencher Tudo Conforme (Teste Rápido)" class="text-xs bg-[#00695C] hover:bg-[#004D40] active:scale-95 text-white/95 border border-white/25 px-2.5 py-1.5 rounded-lg font-medium flex items-center gap-1 transition">
+          <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/>
+          </svg>
+          <span>Auto C</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- Progress bar inside form view -->
+    <div id="progress-container" class="hidden w-full bg-[#004D40] h-1.5">
+      <div id="progress-bar" class="bg-[#4DB6AC] h-1.5 transition-all duration-300" style="width: 0%"></div>
+    </div>
+  </header>
+
+  <!-- MAIN CONTAINER -->
+  <main class="flex-1 w-full max-w-xl mx-auto px-3 py-4 pb-24">
+
+    <!-- ==================== VIEW 1: HOME SELECTION ==================== -->
+    <section id="view-home" class="space-y-4">
+      <!-- Welcome Card -->
+      <div class="modall-card p-5 border-l-4 border-[#00796B]">
+        <div class="flex items-center justify-between">
+          <div>
+            <span class="text-xs font-bold uppercase tracking-wider text-[#00796B]">Operação Portuária & Logística</span>
+            <h2 class="text-xl font-bold text-gray-800 mt-0.5">Selecione o Check-List</h2>
+            <p class="text-sm text-gray-500 mt-1">Preenchimento digital rápido com evidências fotográficas e assinatura.</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Checklist Option A: RTG -->
+      <button onclick="startChecklist('RTG')" class="w-full text-left modall-card p-5 hover:ring-2 hover:ring-[#00796B] active:scale-[0.99] transition flex items-center gap-4 group">
+        <div class="w-14 h-14 rounded-2xl bg-[#00796B]/10 text-[#00796B] flex items-center justify-center shrink-0 group-hover:bg-[#00796B] group-hover:text-white transition">
+          <svg class="w-8 h-8" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M3 21h18M5 21V7l7-4 7 4v14M9 21v-6h6v6M4 7h16M8 11h8"/>
+          </svg>
+        </div>
+        <div class="flex-1 min-w-0">
+          <div class="flex items-center gap-2">
+            <span class="text-[11px] font-bold px-2 py-0.5 rounded bg-[#00796B]/15 text-[#00796B]">ATR 8.5.04A REV00</span>
+            <span class="text-[11px] font-medium text-gray-400">45 itens</span>
+          </div>
+          <h3 class="text-lg font-bold text-gray-800 mt-1">Check List - RTG</h3>
+          <p class="text-xs text-gray-500 mt-0.5">Pórtico sobre Pneus • Segurança, Térreo, Ergonomia, Operacional e Spread</p>
+        </div>
+        <svg class="w-6 h-6 text-gray-400 group-hover:text-[#00796B] shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/>
+        </svg>
+      </button>
+
+      <!-- Checklist Option B: Empilhadeira de Cheio / Reach Stacker -->
+      <button onclick="startChecklist('RS')" class="w-full text-left modall-card p-5 hover:ring-2 hover:ring-[#00796B] active:scale-[0.99] transition flex items-center gap-4 group">
+        <div class="w-14 h-14 rounded-2xl bg-[#00796B]/10 text-[#00796B] flex items-center justify-center shrink-0 group-hover:bg-[#00796B] group-hover:text-white transition">
+          <svg class="w-8 h-8" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M4 17a2 2 0 104 0 2 2 0 00-4 0zm10 0a2 2 0 104 0 2 2 0 00-4 0zM6 15V9h6l3 4v2m3-8l-5 5m5-5h3v3"/>
+          </svg>
+        </div>
+        <div class="flex-1 min-w-0">
+          <div class="flex items-center gap-2">
+            <span class="text-[11px] font-bold px-2 py-0.5 rounded bg-[#00796B]/15 text-[#00796B]">ALFA 8.5.04E / Rev.00</span>
+            <span class="text-[11px] font-medium text-gray-400">29 itens</span>
+          </div>
+          <h3 class="text-lg font-bold text-gray-800 mt-1 leading-snug">Check List - Empilhadeira de Cheio / Reach Stacker</h3>
+          <p class="text-xs text-gray-500 mt-0.5">Terex / Reach Stacker • Com classificação de gravidade (Leve, Médio, Grave)</p>
+        </div>
+        <svg class="w-6 h-6 text-gray-400 group-hover:text-[#00796B] shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/>
+        </svg>
+      </button>
+
+      <!-- Recent History Section -->
+      <div class="pt-2">
+        <div class="flex items-center justify-between px-1 mb-2">
+          <h3 class="text-sm font-bold text-gray-700 uppercase tracking-wide flex items-center gap-1.5">
+            <svg class="w-4 h-4 text-[#00796B]" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
+            </svg>
+            Histórico Recente
+          </h3>
+          <button id="btn-clear-history" onclick="clearHistory()" class="hidden text-xs text-red-600 font-medium hover:underline">Limpar histórico</button>
+        </div>
+        <div id="history-list" class="space-y-2.5">
+          <!-- Populated dynamically via JS -->
+        </div>
+      </div>
+    </section>
+
+    <!-- ==================== VIEW 2: CHECKLIST FORM ==================== -->
+    <section id="view-form" class="hidden space-y-3.5">
+
+      <!-- RTG Mandatory Safety Alert Banner -->
+      <div id="rtg-alert-banner" class="hidden bg-amber-50 border-l-4 border-amber-600 rounded-xl p-4 shadow-sm">
+        <div class="flex items-start gap-3">
+          <svg class="w-6 h-6 text-amber-600 shrink-0 mt-0.5" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
+          </svg>
+          <p class="text-xs sm:text-sm font-semibold text-amber-950 leading-relaxed">
+            <span class="font-extrabold uppercase">ATENÇÃO:</span> O Operador tem o direito e o dever de não operar em caso de identificação de pelo menos 01 item NÃO CONFORME (N.C).
+          </p>
+        </div>
+      </div>
+
+      <!-- IDENTIFICATION CARDS -->
+      <div id="identification-cards" class="space-y-3.5">
+        <!-- Card 1: Nº do Equipamento -->
+        <div class="modall-card p-4" id="card-equipamento">
+          <div class="flex justify-between items-start mb-2">
+            <label id="label-equipamento" for="input-equipamento" class="text-sm font-medium text-gray-600">Nº RTG</label>
+            <span class="text-red-600 font-bold text-base leading-none">*</span>
+          </div>
+          <input type="text" id="input-equipamento" placeholder="Ex: RTG-01" class="modall-underline-input font-semibold" oninput="updateHeaderField('equipamento', this.value)">
+        </div>
+
+        <!-- Card 2: Nome do Operador -->
+        <div class="modall-card p-4" id="card-operador">
+          <div class="flex justify-between items-start mb-2">
+            <label for="input-operador" class="text-sm font-medium text-gray-600">Nome do Operador</label>
+            <span class="text-red-600 font-bold text-base leading-none">*</span>
+          </div>
+          <input type="text" id="input-operador" placeholder="Digite seu nome completo" class="modall-underline-input" oninput="updateHeaderField('operador', this.value)">
+        </div>
+
+        <!-- Card 3: Horímetro -->
+        <div class="modall-card p-4" id="card-horimetro">
+          <div class="flex justify-between items-start mb-2">
+            <label for="input-horimetro" class="text-sm font-medium text-gray-600">Horímetro</label>
+            <span class="text-red-600 font-bold text-base leading-none">*</span>
+          </div>
+          <input type="number" step="0.1" inputmode="decimal" id="input-horimetro" placeholder="Ex: 12450.5" class="modall-underline-input" oninput="updateHeaderField('horimetro', this.value)">
+        </div>
+
+        <!-- Card 4: Data & Horário -->
+        <div class="modall-card p-4" id="card-data-hora">
+          <div class="grid grid-cols-2 gap-4">
+            <div>
+              <div class="flex justify-between items-start mb-1">
+                <label for="input-data" class="text-sm font-medium text-gray-600">Data</label>
+                <span class="text-red-600 font-bold text-base leading-none">*</span>
+              </div>
+              <input type="date" id="input-data" class="modall-underline-input text-sm" onchange="updateHeaderField('data', this.value)">
+            </div>
+            <div>
+              <div class="flex justify-between items-start mb-1">
+                <label for="input-horario" class="text-sm font-medium text-gray-600">Horário</label>
+                <span class="text-red-600 font-bold text-base leading-none">*</span>
+              </div>
+              <input type="time" id="input-horario" class="modall-underline-input text-sm" onchange="updateHeaderField('horario', this.value)">
+            </div>
+          </div>
+        </div>
+
+        <!-- Card 5: Turno (1º, 2º, 3º) -->
+        <div class="modall-card p-4" id="card-turno">
+          <div class="flex justify-between items-start mb-3">
+            <span class="text-sm font-medium text-gray-600">Turno</span>
+            <span class="text-red-600 font-bold text-base leading-none">*</span>
+          </div>
+          <div class="grid grid-cols-3 gap-2.5">
+            <button type="button" onclick="selectTurno('1º')" id="btn-turno-1º" class="turno-btn-default py-4 text-base">1º</button>
+            <button type="button" onclick="selectTurno('2º')" id="btn-turno-2º" class="turno-btn-default py-4 text-base">2º</button>
+            <button type="button" onclick="selectTurno('3º')" id="btn-turno-3º" class="turno-btn-default py-4 text-base">3º</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- DYNAMIC CHECKLIST ITEMS CONTAINER -->
+      <div id="checklist-items-container" class="space-y-3.5">
+        <!-- Rendered dynamically by JS -->
+      </div>
+
+      <!-- FINALIZATION SECTION -->
+      <div class="space-y-3.5 pt-2">
+        <!-- Card: OBSERVAÇÕES GERAIS -->
+        <div class="modall-card p-4">
+          <div class="flex justify-between items-start mb-2">
+            <label for="input-obs-geral" class="text-sm font-semibold text-gray-600 uppercase tracking-wide">OBSERVAÇÕES GERAIS</label>
+          </div>
+          <input type="text" id="input-obs-geral" placeholder="Escreva aqui observações gerais da inspeção..." class="modall-underline-input mb-3" oninput="state.generalObs = this.value">
+          
+          <!-- General Photos Thumbnails -->
+          <div id="general-photos-preview" class="hidden grid grid-cols-5 gap-2 mb-3"></div>
+
+          <div class="grid grid-cols-2 gap-2.5">
+            <button type="button" onclick="document.getElementById('input-obs-geral').focus()" class="modall-sub-btn py-2.5 px-3 flex items-center justify-center gap-2">
+              <svg class="w-5 h-5 text-gray-600" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z"/>
+              </svg>
+              <span>Comentário</span>
+            </button>
+            <button type="button" onclick="triggerPhotoUpload('general')" class="modall-sub-btn py-2.5 px-3 flex items-center justify-center gap-2">
+              <svg id="icon-photo-general" class="w-5 h-5 text-gray-800" fill="currentColor" viewBox="0 0 24 24">
+                <path d="M9 3L7.17 5H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2h-3.17L15 3H9zm3 15c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5zm0-8c-1.65 0-3 1.35-3 3s1.35 3 3 3 3-1.35 3-3-1.35-3-3-3z"/>
+              </svg>
+              <span id="label-photo-general">Foto</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Card: ASSINATURA DO OPERADOR / RESPONSÁVEL (Obrigatória *) -->
+        <div class="modall-card p-4" id="card-sig-operador">
+          <div class="flex justify-between items-center mb-1">
+            <span class="text-sm font-semibold text-gray-600 uppercase">ASSINATURA DO OPERADOR / RESPONSÁVEL</span>
+            <div class="flex items-center gap-2">
+              <button type="button" onclick="clearSignature('operador')" class="text-xs text-gray-500 hover:text-red-600 font-medium px-2 py-1 rounded bg-gray-100">Limpar</button>
+              <span class="text-red-600 font-bold text-base leading-none">*</span>
+            </div>
+          </div>
+          <div class="relative border border-dashed border-gray-300 rounded-xl bg-gray-50/60 overflow-hidden my-2">
+            <!-- Fountain pen nib watermark icon when empty -->
+            <div id="placeholder-sig-operador" class="pointer-events-none absolute inset-0 flex flex-col items-center justify-center text-gray-400">
+              <svg class="w-8 h-8 mb-1 opacity-75" fill="currentColor" viewBox="0 0 24 24">
+                <path d="M18.6 3.4c-.8-.8-2-.8-2.8 0L4.2 15l-1.2 5.4c-.1.5.3.9.8.8l5.4-1.2L20.8 8.4c.8-.8.8-2 0-2.8l-2.2-2.2zM8.5 18.2l-3.1.7.7-3.1 8.8-8.8 2.4 2.4-8.8 8.8z"/>
+              </svg>
+              <span class="text-[11px]">Assine com o dedo aqui</span>
+            </div>
+            <canvas id="canvas-sig-operador" class="sig-canvas"></canvas>
+          </div>
+        </div>
+
+        <!-- Primary Save Button -->
+        <div class="pt-2">
+          <button type="button" onclick="validateAndSave()" class="w-full bg-[#00796B] hover:bg-[#00695C] active:scale-[0.99] text-white font-bold text-base py-4 rounded-2xl shadow-lg transition tracking-wide uppercase">
+            SALVAR
+          </button>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- HIDDEN SHARED FILE INPUT FOR PHOTOS (Max 5 per item) -->
+  <input type="file" id="global-photo-input" accept="image/*" capture="environment" multiple class="hidden" onchange="handlePhotoFiles(event)">
+
+  <!-- ==================== TOAST / MESSAGE BOX (NO ALERT()) ==================== -->
+  <div id="toast-box" class="fixed bottom-5 left-1/2 -translate-x-1/2 z-50 hidden max-w-md w-[92%] bg-gray-900 text-white px-4 py-3.5 rounded-xl shadow-2xl flex items-center gap-3 transition-all">
+    <span id="toast-icon" class="shrink-0"></span>
+    <p id="toast-message" class="text-sm font-medium flex-1"></p>
+    <button onclick="hideToast()" class="text-gray-400 hover:text-white text-xs font-bold uppercase px-2 py-1">OK</button>
+  </div>
+
+  <!-- ==================== PHOTO LIGHTBOX MODAL ==================== -->
+  <div id="photo-modal" class="fixed inset-0 z-50 hidden bg-black/85 flex flex-col items-center justify-center p-4" onclick="closePhotoModal()">
+    <div class="relative max-w-lg w-full bg-white rounded-2xl overflow-hidden shadow-2xl" onclick="event.stopPropagation()">
+      <div class="flex items-center justify-between px-4 py-3 bg-[#00796B] text-white">
+        <span id="photo-modal-title" class="text-sm font-semibold truncate">Evidência Fotográfica</span>
+        <button onclick="closePhotoModal()" class="p-1 rounded-lg hover:bg-white/20">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/>
+          </svg>
+        </button>
+      </div>
+      <div class="bg-black flex items-center justify-center max-h-[70vh] overflow-hidden">
+        <img id="photo-modal-img" src="" alt="Foto ampliada" class="max-h-[70vh] w-auto object-contain">
+      </div>
+      <div class="p-3 bg-gray-50 flex justify-between items-center">
+        <span id="photo-modal-caption" class="text-xs text-gray-500"></span>
+        <button id="photo-modal-delete" class="px-3 py-1.5 bg-red-600 text-white text-xs font-semibold rounded-lg hover:bg-red-700">
+          Remover Foto
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ==================== COMPLETION & PDF SHARE MODAL ==================== -->
+  <div id="completion-modal" class="fixed inset-0 z-50 hidden bg-black/70 backdrop-blur-xs flex items-end sm:items-center justify-center p-0 sm:p-4">
+    <div class="bg-white w-full max-w-md rounded-t-3xl sm:rounded-2xl shadow-2xl overflow-hidden animate-slide-up">
+      <!-- Modal Header -->
+      <div class="bg-[#00796B] text-white p-5 text-center">
+        <div class="w-12 h-12 rounded-full bg-white/20 mx-auto flex items-center justify-center mb-2">
+          <svg class="w-7 h-7 text-white" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/>
+          </svg>
+        </div>
+        <h3 class="text-lg font-bold">Check-List Concluído!</h3>
+        <p id="summary-subtitle" class="text-xs text-white/85 mt-0.5"></p>
+      </div>
+
+      <!-- Summary Counters -->
+      <div class="p-5 space-y-4">
+        <div class="grid grid-cols-3 gap-2 text-center">
+          <div class="bg-green-50 border border-green-200 rounded-xl p-2.5">
+            <span id="count-conforme" class="block text-xl font-extrabold text-green-700">0</span>
+            <span class="text-[11px] font-semibold text-green-800 uppercase">Conformes</span>
+          </div>
+          <div class="bg-red-50 border border-red-200 rounded-xl p-2.5">
+            <span id="count-nc" class="block text-xl font-extrabold text-red-700">0</span>
+            <span class="text-[11px] font-semibold text-red-800 uppercase">Não Conf.</span>
+          </div>
+          <div class="bg-slate-100 border border-slate-200 rounded-xl p-2.5">
+            <span id="count-na" class="block text-xl font-extrabold text-slate-700">0</span>
+            <span class="text-[11px] font-semibold text-slate-700 uppercase">N/A</span>
+          </div>
+        </div>
+
+        <!-- Warning banner if any N/C exists -->
+        <div id="summary-nc-alert" class="hidden bg-red-50 border-l-4 border-red-600 p-3 rounded-lg">
+          <p class="text-xs font-bold text-red-800">
+            ⚠️ ATENÇÃO: Foram identificados itens NÃO CONFORMES. Comunique imediatamente a supervisão/manutenção.
+          </p>
+        </div>
+
+        <!-- Action Buttons -->
+        <div class="space-y-2.5 pt-1">
+          <button type="button" onclick="shareGeneratedPDF()" class="w-full bg-[#25D366] hover:bg-[#20BD5A] active:scale-[0.99] text-white font-bold py-3.5 px-4 rounded-xl shadow-md flex items-center justify-center gap-2.5 transition">
+            <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+              <path d="M18 16.08c-.76 0-1.44.3-1.96.77L8.91 12.7c.05-.23.09-.46.09-.7s-.04-.47-.09-.7l7.05-4.11c.54.5 1.25.81 2.04.81 1.66 0 3-1.34 3-3s-1.34-3-3-3-3 1.34-3 3c0 .24.04.47.09.7L8.04 9.81C7.5 9.31 6.79 9 6 9c-1.66 0-3 1.34-3 3s1.34 3 3 3c.79 0 1.5-.31 2.04-.81l7.12 4.16c-.05.21-.08.43-.08.65 0 1.61 1.31 2.92 2.92 2.92s2.92-1.31 2.92-2.92c0-1.61-1.31-2.92-2.92-2.92z"/>
+            </svg>
+            <span>Compartilhar PDF (WhatsApp / Mídia)</span>
+          </button>
+
+          <button type="button" onclick="downloadGeneratedPDF()" class="w-full bg-[#00796B] hover:bg-[#00695C] active:scale-[0.99] text-white font-bold py-3.5 px-4 rounded-xl shadow-md flex items-center justify-center gap-2.5 transition">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/>
+            </svg>
+            <span>Baixar PDF</span>
+          </button>
+
+          <button type="button" onclick="startNewChecklistFromModal()" class="w-full bg-gray-100 hover:bg-gray-200 text-gray-700 font-semibold py-3 px-4 rounded-xl transition text-sm">
+            Novo Check-list
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // =========================================================================
+    // 1. CHECKLIST DATA DEFINITIONS (EXACT EXTRACTION FROM PROVIDED PDFs)
+    // =========================================================================
+    const CHECKLIST_TEMPLATES = {
+      RTG: {
+        id: 'RTG',
+        title: "Vistoria 'CheckList - RTG'",
+        pdfTitle: 'CHECK LIST - RTG',
+        docCode: 'ATR 8.5.04A REV00',
+        company: 'NAVEGAÇÃO • GRUPO CHO',
+        equipLabel: 'Nº RTG',
+        equipPlaceholder: 'Ex: RTG-01',
+        hasSeverity: false,
+        sections: [
+          {
+            title: '1- Itens de Segurança',
+            items: [
+              'Alto falante (boca de lata), telefone, comunicação (HT)',
+              'Extintor Cabine',
+              'Portões de Acesso / Carro (troller) e Travas',
+              'Sinalização Spread',
+              'Iluminação Operacional no período Noturno',
+              'Sirene de Translação',
+              'Grade de Proteção de Pneus',
+              'Vazamento de Óleo contínuo (Descrever na observação)',
+              'Bigode de Anti Colisão'
+            ]
+          },
+          {
+            title: '2- Itens de Equipamento no Térreo',
+            items: [
+              'Área da Faixa Operacional Desimpedida?',
+              'Há alguma Avaria? (Descrever no campo de Observações)',
+              'Retiradas as Ancoragens?',
+              'Motores de Translação',
+              'Bombas de Giro dos Pneus',
+              'Bateria'
+            ]
+          },
+          {
+            title: '3- Itens de Ergonomia',
+            items: [
+              'Acesso / Escada / Guarda Corpo',
+              'Banco do Operador',
+              'Limpeza da Cabine',
+              'Limpeza dos Vidros',
+              'Ar Condicionado',
+              'Luz da Cabine',
+              'Monitor da Cabine',
+              'Porta de Acesso / Cabine'
+            ]
+          },
+          {
+            title: '4- Itens Operacionais',
+            items: [
+              'Chave Geral da Bateria',
+              'Painel de Controle Sala Gerador',
+              'Nível de Óleo Diesel',
+              'Alinhamento / Trim-List',
+              'Fim de Curso de Translação',
+              'Coletor de Dados',
+              'Comandos Operacionais',
+              'Sinalização da Cabine',
+              'Sistema Translação',
+              'Velocidade de Elevação',
+              'Limpador de Para-Brisa',
+              'Condições do Cabo Aço'
+            ]
+          },
+          {
+            title: '5- Itens Spread',
+            items: [
+              'Guias de Canto',
+              'Abertura / Fechamento'
+            ]
+          },
+          {
+            title: '6- Condições Gerais',
+            items: [
+              'Condições dos Pneus',
+              'Balança dos Pneus',
+              'Limpeza da Casa do Motor e Gerador',
+              'Translação',
+              'Calços dos Pneus',
+              'Tablet',
+              'Cabo USB / Carregador',
+              'Rádio de Comunicação'
+            ]
+          }
+        ]
+      },
+      RS: {
+        id: 'RS',
+        title: "Vistoria 'Empilhadeira de Cheio'",
+        pdfTitle: 'CHECK LIST - TEREX / REACH STACKER',
+        docCode: 'ALFA 8.5.04E / Rev.00',
+        company: 'NAVEGAÇÃO - TRANSPORTE - LOGÍSTICA • GRUPO CHO',
+        equipLabel: 'Nº Reach Stacker',
+        equipPlaceholder: 'Ex: RS-04',
+        hasSeverity: true,
+        sections: [
+          {
+            title: 'Itens para Verificação',
+            items: [
+              'Limpeza da Máquina',
+              'Extintor',
+              'Buzina',
+              'Iluminação',
+              'Giro-Flex',
+              'Sirene de Ré',
+              'Luz de Marcha Ré',
+              'Espelho retrovisor',
+              'Freio estacionário',
+              'Pneu em bom estado',
+              'Limpador de parabrisa',
+              'Ar condicionado',
+              'Articulação da lança spreader',
+              'Calço Deslizamento da lança',
+              'Nível do Óleo Diesel',
+              'Corrente de Abertura do Spreader',
+              'Dente da Coroa de Giro',
+              'Estrutura',
+              'Pinos Apalpadores do Spreader',
+              'Todos os Pinos Lança',
+              'Pinos do Lock',
+              'Motor',
+              'Óleo do Motor',
+              'Óleo Hidráulico',
+              'Radiador',
+              'Nível de Água',
+              'Tablet',
+              'Cabo USB / Carregador do Tablet',
+              'Rádio de Comunicação'
+            ]
+          }
+        ]
+      }
+    };
+
+    // =========================================================================
+    // 2. APPLICATION STATE
+    // =========================================================================
+    let state = {
+      type: null, // 'RTG' | 'RS'
+      header: {
+        equipamento: '',
+        operador: '',
+        horimetro: '',
+        data: '',
+        horario: '',
+        turno: ''
+      },
+      items: {}, // { [itemIndex]: { status: 'C'|'NC'|'NA', severity: 'LEVE'|'MÉDIO'|'GRAVE'|'', comment: '', showComment: false, photos: [] } }
+      generalObs: '',
+      generalPhotos: [],
+      signatures: {
+        operador: null
+      }
+    };
+
+    let activePhotoTarget = null; // 'general' or numeric item index
+    let currentGeneratedPdfBlob = null;
+    let currentGeneratedPdfFilename = 'checklist.pdf';
+    let flatItemsList = [];
+    const signaturePads = {};
+
+    // =========================================================================
+    // 3. INITIALIZATION & NAVIGATION
+    // =========================================================================
+    window.addEventListener('DOMContentLoaded', () => {
+      initSignatureCanvases();
+      renderHistory();
+    });
+
+    function goHome() {
+      document.getElementById('view-form').classList.add('hidden');
+      document.getElementById('view-home').classList.remove('hidden');
+      document.getElementById('btn-back').classList.add('hidden');
+      document.getElementById('header-actions').classList.add('hidden');
+      document.getElementById('progress-container').classList.add('hidden');
+      document.getElementById('header-title').textContent = 'Modall Check';
+      renderHistory();
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    function startChecklist(type) {
+      const template = CHECKLIST_TEMPLATES[type];
+      if (!template) return;
+
+      // Get current date & time
+      const now = new Date();
+      const dateStr = now.toISOString().split('T')[0];
+      const timeStr = now.toTimeString().slice(0, 5);
+
+      // Reset state
+      state = {
+        type: type,
+        header: {
+          equipamento: '',
+          operador: '',
+          horimetro: '',
+          data: dateStr,
+          horario: timeStr,
+          turno: ''
+        },
+        items: {},
+        generalObs: '',
+        generalPhotos: [],
+        signatures: {
+          operador: null
+        }
+      };
+
+      // Build flat items list & initialize state per item
+      flatItemsList = [];
+      let globalIdx = 0;
+      template.sections.forEach(sec => {
+        sec.items.forEach(label => {
+          flatItemsList.push({ index: globalIdx, section: sec.title, label });
+          state.items[globalIdx] = {
+            status: '',
+            severity: '',
+            comment: '',
+            showComment: false,
+            photos: []
+          };
+          globalIdx++;
+        });
+      });
+
+      // Update Header UI
+      document.getElementById('header-title').textContent = template.title;
+      document.getElementById('btn-back').classList.remove('hidden');
+      document.getElementById('header-actions').classList.remove('hidden');
+      document.getElementById('progress-container').classList.remove('hidden');
+
+      // Show/Hide RTG Mandatory Safety Banner
+      const rtgAlert = document.getElementById('rtg-alert-banner');
+      if (type === 'RTG') {
+        rtgAlert.classList.remove('hidden');
+      } else {
+        rtgAlert.classList.add('hidden');
+      }
+
+      // Populate identification inputs
+      document.getElementById('label-equipamento').textContent = template.equipLabel;
+      const eqInput = document.getElementById('input-equipamento');
+      eqInput.value = '';
+      eqInput.placeholder = template.equipPlaceholder;
+
+      document.getElementById('input-operador').value = '';
+      document.getElementById('input-horimetro').value = '';
+      document.getElementById('input-data').value = dateStr;
+      document.getElementById('input-horario').value = timeStr;
+      document.getElementById('input-obs-geral').value = '';
+
+      // Reset Turno buttons
+      ['1º', '2º', '3º'].forEach(t => {
+        const btn = document.getElementById(`btn-turno-${t}`);
+        btn.classList.remove('turno-btn-active');
+      });
+
+      // Reset General Photos preview
+      renderGeneralPhotos();
+
+      // Render Checklist Cards
+      renderChecklistCards(template);
+
+      // Switch views
+      document.getElementById('view-home').classList.add('hidden');
+      document.getElementById('view-form').classList.remove('hidden');
+
+      // Resize & clear signature pad after view becomes visible
+      setTimeout(() => {
+        resizeAllSignatureCanvases();
+        clearSignature('operador');
+      }, 50);
+
+      updateProgress();
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    // =========================================================================
+    // 4. FORM RENDERING & INTERACTIONS
+    // =========================================================================
+    function renderChecklistCards(template) {
+      const container = document.getElementById('checklist-items-container');
+      container.innerHTML = '';
+
+      let globalIdx = 0;
+
+      template.sections.forEach(section => {
+        // Section Header Card (Matches Modelo 1: "1- Itens de Segurança - (NÃO RESPONDA)")
+        const secCard = document.createElement('div');
+        secCard.className = 'modall-card p-4 border-l-4 border-[#00796B]';
+        secCard.innerHTML = `
+          <div class="flex items-center justify-between">
+            <h3 class="text-sm font-bold text-gray-800">${section.title} <span class="text-gray-400 font-normal text-xs">- (NÃO RESPONDA)</span></h3>
+          </div>
+          <div class="mt-2 border-b border-gray-300"></div>
+        `;
+        container.appendChild(secCard);
+
+        // Item Cards
+        section.items.forEach(itemLabel => {
+          const idx = globalIdx;
+          const card = document.createElement('div');
+          card.id = `item-card-${idx}`;
+          card.className = 'modall-card p-4 transition-all';
+
+          card.innerHTML = `
+            <!-- Item Title & Required Asterisk -->
+            <div class="flex justify-between items-start gap-2 mb-3">
+              <p class="text-[15px] font-medium text-gray-700 leading-snug">${itemLabel}</p>
+              <span class="text-red-600 font-bold text-base leading-none shrink-0">*</span>
+            </div>
+
+            <!-- 3 Status Buttons: CONFORME | NÃO CONFORME | N/A NÃO APLICÁVEL -->
+            <div class="grid grid-cols-3 gap-2 mb-3">
+              <button type="button" id="btn-status-${idx}-C" onclick="setItemStatus(${idx}, 'C')" class="status-btn-default py-3 px-1 flex flex-col items-center justify-center gap-1">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2.8" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/>
+                </svg>
+                <span class="text-[11px] font-bold tracking-wide">CONFORME</span>
+              </button>
+
+              <button type="button" id="btn-status-${idx}-NC" onclick="setItemStatus(${idx}, 'NC')" class="status-btn-default py-3 px-1 flex flex-col items-center justify-center gap-1">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2.8" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/>
+                </svg>
+                <span class="text-[11px] font-bold tracking-wide">NÃO CONFORME</span>
+              </button>
+
+              <button type="button" id="btn-status-${idx}-NA" onclick="setItemStatus(${idx}, 'NA')" class="status-btn-default py-3 px-1 flex flex-col items-center justify-center gap-0.5">
+                <span class="text-sm font-extrabold leading-tight">N/A</span>
+                <span class="text-[10px] font-bold tracking-tight leading-tight text-center">NÃO APLICÁVEL</span>
+              </button>
+            </div>
+
+            <!-- Reach Stacker Severity Selector (Shown only when RS + NÃO CONFORME) -->
+            ${template.hasSeverity ? `
+              <div id="severity-box-${idx}" class="hidden mb-3 p-3 rounded-xl bg-red-50 border border-red-200">
+                <div class="flex items-center justify-between mb-2">
+                  <span class="text-xs font-bold text-red-800 uppercase">Classificação da Falha (Obrigatório) *</span>
+                </div>
+                <div class="grid grid-cols-3 gap-2">
+                  <button type="button" id="btn-sev-${idx}-LEVE" onclick="setItemSeverity(${idx}, 'LEVE')" class="py-2 px-2 rounded-lg text-xs font-bold border border-amber-300 bg-white text-amber-800 transition">LEVE</button>
+                  <button type="button" id="btn-sev-${idx}-MÉDIO" onclick="setItemSeverity(${idx}, 'MÉDIO')" class="py-2 px-2 rounded-lg text-xs font-bold border border-orange-400 bg-white text-orange-800 transition">MÉDIO</button>
+                  <button type="button" id="btn-sev-${idx}-GRAVE" onclick="setItemSeverity(${idx}, 'GRAVE')" class="py-2 px-2 rounded-lg text-xs font-bold border border-red-500 bg-white text-red-800 transition">GRAVE</button>
+                </div>
+              </div>
+            ` : ''}
+
+            <!-- Inline Comment Box (Toggled by Comentário button) -->
+            <div id="comment-box-${idx}" class="hidden mb-3">
+              <input type="text" id="input-comment-${idx}" placeholder="Descreva a observação ou anomalia..." class="modall-underline-input text-sm" oninput="updateItemComment(${idx}, this.value)">
+            </div>
+
+            <!-- Photo Thumbnails Grid (Up to 5 photos) -->
+            <div id="photos-preview-${idx}" class="hidden grid grid-cols-5 gap-2 mb-3"></div>
+
+            <!-- Bottom Sub-Action Buttons: Comentário | Foto -->
+            <div class="grid grid-cols-2 gap-2.5">
+              <button type="button" id="btn-comment-toggle-${idx}" onclick="toggleItemComment(${idx})" class="modall-sub-btn py-2.5 px-3 flex items-center justify-center gap-2">
+                <svg class="w-5 h-5 text-gray-600" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z"/>
+                </svg>
+                <span>Comentário</span>
+              </button>
+
+              <button type="button" id="btn-photo-${idx}" onclick="triggerPhotoUpload(${idx})" class="modall-sub-btn py-2.5 px-3 flex items-center justify-center gap-2">
+                <svg id="icon-photo-${idx}" class="w-5 h-5 text-gray-800" fill="currentColor" viewBox="0 0 24 24">
+                  <path d="M9 3L7.17 5H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2h-3.17L15 3H9zm3 15c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5zm0-8c-1.65 0-3 1.35-3 3s1.35 3 3 3 3-1.35 3-3-1.35-3-3-3z"/>
+                </svg>
+                <span id="label-photo-${idx}">Foto</span>
+              </button>
+            </div>
+          `;
+
+          container.appendChild(card);
+          globalIdx++;
+        });
+      });
+    }
+
+    function updateHeaderField(field, value) {
+      state.header[field] = value;
+      const cardMap = {
+        equipamento: 'card-equipamento',
+        operador: 'card-operador',
+        horimetro: 'card-horimetro',
+        data: 'card-data-hora',
+        horario: 'card-data-hora'
+      };
+      if (cardMap[field]) {
+        document.getElementById(cardMap[field]).classList.remove('ring-2', 'ring-red-500');
+      }
+      updateProgress();
+    }
+
+    function selectTurno(turno) {
+      state.header.turno = turno;
+      ['1º', '2º', '3º'].forEach(t => {
+        const btn = document.getElementById(`btn-turno-${t}`);
+        if (t === turno) {
+          btn.classList.add('turno-btn-active');
+        } else {
+          btn.classList.remove('turno-btn-active');
+        }
+      });
+      document.getElementById('card-turno').classList.remove('ring-2', 'ring-red-500');
+      updateProgress();
+    }
+
+    function setItemStatus(idx, status) {
+      state.items[idx].status = status;
+
+      // Reset button styles
+      ['C', 'NC', 'NA'].forEach(s => {
+        const btn = document.getElementById(`btn-status-${idx}-${s}`);
+        btn.classList.remove('status-btn-conforme', 'status-btn-nc', 'status-btn-na');
+      });
+
+      const activeBtn = document.getElementById(`btn-status-${idx}-${status}`);
+      if (status === 'C') activeBtn.classList.add('status-btn-conforme');
+      if (status === 'NC') activeBtn.classList.add('status-btn-nc');
+      if (status === 'NA') activeBtn.classList.add('status-btn-na');
+
+      // Handle Reach Stacker Severity box
+      const sevBox = document.getElementById(`severity-box-${idx}`);
+      if (sevBox) {
+        if (status === 'NC') {
+          sevBox.classList.remove('hidden');
+        } else {
+          sevBox.classList.add('hidden');
+          state.items[idx].severity = '';
+          ['LEVE', 'MÉDIO', 'GRAVE'].forEach(sv => {
+            const sBtn = document.getElementById(`btn-sev-${idx}-${sv}`);
+            if (sBtn) sBtn.className = 'py-2 px-2 rounded-lg text-xs font-bold border border-gray-300 bg-white text-gray-700 transition';
+          });
+        }
+      }
+
+      // Automatically open comment input when marked Não Conforme for convenience
+      if (status === 'NC' && !state.items[idx].showComment) {
+        toggleItemComment(idx, true);
+      }
+
+      document.getElementById(`item-card-${idx}`).classList.remove('ring-2', 'ring-red-500');
+      updateProgress();
+    }
+
+    function setItemSeverity(idx, severity) {
+      state.items[idx].severity = severity;
+      const styles = {
+        'LEVE': 'py-2 px-2 rounded-lg text-xs font-extrabold bg-amber-500 text-white shadow-sm transition',
+        'MÉDIO': 'py-2 px-2 rounded-lg text-xs font-extrabold bg-orange-600 text-white shadow-sm transition',
+        'GRAVE': 'py-2 px-2 rounded-lg text-xs font-extrabold bg-red-700 text-white shadow-sm transition'
+      };
+      ['LEVE', 'MÉDIO', 'GRAVE'].forEach(sv => {
+        const btn = document.getElementById(`btn-sev-${idx}-${sv}`);
+        if (sv === severity) {
+          btn.className = styles[sv];
+        } else {
+          btn.className = 'py-2 px-2 rounded-lg text-xs font-bold border border-gray-300 bg-white text-gray-700 transition';
+        }
+      });
+      document.getElementById(`item-card-${idx}`).classList.remove('ring-2', 'ring-red-500');
+    }
+
+    function toggleItemComment(idx, forceOpen = null) {
+      const box = document.getElementById(`comment-box-${idx}`);
+      const input = document.getElementById(`input-comment-${idx}`);
+      const shouldOpen = forceOpen !== null ? forceOpen : box.classList.contains('hidden');
+
+      state.items[idx].showComment = shouldOpen;
+      if (shouldOpen) {
+        box.classList.remove('hidden');
+        if (forceOpen === null) input.focus();
+      } else if (!state.items[idx].comment.trim()) {
+        box.classList.add('hidden');
+      }
+    }
+
+    function updateItemComment(idx, text) {
+      state.items[idx].comment = text;
+      const btn = document.getElementById(`btn-comment-toggle-${idx}`);
+      if (text.trim().length > 0) {
+        btn.classList.add('text-[#00796B]', 'bg-[#00796B]/10');
+      } else {
+        btn.classList.remove('text-[#00796B]', 'bg-[#00796B]/10');
+      }
+    }
+
+    function updateProgress() {
+      const totalItems = flatItemsList.length;
+      if (totalItems === 0) return;
+
+      let answered = 0;
+      for (let i = 0; i < totalItems; i++) {
+        if (state.items[i].status) answered++;
+      }
+
+      const pct = Math.round((answered / totalItems) * 100);
+      document.getElementById('progress-bar').style.width = `${pct}%`;
+    }
+
+    // Quick-fill helper for rapid testing/demo
+    function quickFillTest() {
+      const template = CHECKLIST_TEMPLATES[state.type];
+      if (!state.header.equipamento) {
+        const val = state.type === 'RTG' ? 'RTG-03' : 'RS-02';
+        document.getElementById('input-equipamento').value = val;
+        state.header.equipamento = val;
+      }
+      if (!state.header.operador) {
+        document.getElementById('input-operador').value = 'Carlos Eduardo Silva';
+        state.header.operador = 'Carlos Eduardo Silva';
+      }
+      if (!state.header.horimetro) {
+        document.getElementById('input-horimetro').value = '14820.5';
+        state.header.horimetro = '14820.5';
+      }
+      if (!state.header.turno) {
+        selectTurno('1º');
+      }
+
+      flatItemsList.forEach(item => {
+        if (!state.items[item.index].status) {
+          setItemStatus(item.index, 'C');
+        }
+      });
+
+      showToast('Itens pendentes preenchidos como CONFORME.', 'success');
+    }
+
+    // =========================================================================
+    // 5. PHOTO UPLOAD (MAX 5 PHOTOS PER ITEM + CANVAS COMPRESSION)
+    // =========================================================================
+    function triggerPhotoUpload(target) {
+      const currentPhotos = target === 'general'
+        ? state.generalPhotos
+        : state.items[target].photos;
+
+      if (currentPhotos.length >= 5) {
+        showToast('Limite máximo de 5 fotos atingido para este item.', 'warning');
+        return;
+      }
+
+      activePhotoTarget = target;
+      const input = document.getElementById('global-photo-input');
+      input.value = '';
+      input.click();
+    }
+
+    async function handlePhotoFiles(event) {
+      const files = Array.from(event.target.files || []);
+      if (!files.length || activePhotoTarget === null) return;
+
+      const targetArray = activePhotoTarget === 'general'
+        ? state.generalPhotos
+        : state.items[activePhotoTarget].photos;
+
+      const remainingSlots = 5 - targetArray.length;
+      if (remainingSlots <= 0) {
+        showToast('Limite de 5 fotos atingido.', 'warning');
+        return;
+      }
+
+      const filesToProcess = files.slice(0, remainingSlots);
+      if (files.length > remainingSlots) {
+        showToast(`Apenas ${remainingSlots} foto(s) adicionada(s) (limite de 5 por item).`, 'warning');
+      }
+
+      for (const file of filesToProcess) {
+        try {
+          const compressedDataUrl = await compressImageFile(file, 960, 0.72);
+          targetArray.push(compressedDataUrl);
+        } catch (err) {
+          console.error('Erro ao processar foto:', err);
+          showToast('Não foi possível processar uma das imagens.', 'error');
+        }
+      }
+
+      if (activePhotoTarget === 'general') {
+        renderGeneralPhotos();
+      } else {
+        renderItemPhotos(activePhotoTarget);
+      }
+    }
+
+    function compressImageFile(file, maxWidth = 960, quality = 0.72) {
+      return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onerror = reject;
+        reader.onload = (e) => {
+          const img = new Image();
+          img.onerror = reject;
+          img.onload = () => {
+            let width = img.width;
+            let height = img.height;
+
+            if (width > maxWidth) {
+              height = Math.round((height * maxWidth) / width);
+              width = maxWidth;
+            }
+
+            const canvas = document.createElement('canvas');
+            canvas.width = width;
+            canvas.height = height;
+            const ctx = canvas.getContext('2d');
+            ctx.drawImage(img, 0, 0, width, height);
+
+            resolve(canvas.toDataURL('image/jpeg', quality));
+          };
+          img.src = e.target.result;
+        };
+        reader.readAsDataURL(file);
+      });
+    }
+
+    function renderItemPhotos(idx) {
+      const photos = state.items[idx].photos;
+      const previewContainer = document.getElementById(`photos-preview-${idx}`);
+      const iconEl = document.getElementById(`icon-photo-${idx}`);
+      const labelEl = document.getElementById(`label-photo-${idx}`);
+
+      if (photos.length === 0) {
+        previewContainer.classList.add('hidden');
+        previewContainer.innerHTML = '';
+        iconEl.classList.remove('text-red-600');
+        iconEl.classList.add('text-gray-800');
+        labelEl.classList.remove('text-red-600');
+        labelEl.textContent = 'Foto';
+        return;
+      }
+
+      // Highlight camera icon in red when photos exist
+      iconEl.classList.remove('text-gray-800');
+      iconEl.classList.add('text-red-600');
+      labelEl.classList.add('text-red-600');
+      labelEl.textContent = `Foto (${photos.length}/5)`;
+
+      previewContainer.classList.remove('hidden');
+      previewContainer.innerHTML = photos.map((src, pIdx) => `
+        <div class="relative aspect-square rounded-lg overflow-hidden border border-gray-300 bg-gray-100 group">
+          <img src="${src}" alt="Foto ${pIdx + 1}" onclick="openPhotoModal(${idx}, ${pIdx})" class="w-full h-full object-cover cursor-pointer">
+          <button type="button" onclick="removePhoto(${idx}, ${pIdx})" aria-label="Remover foto" class="absolute top-0.5 right-0.5 w-5 h-5 rounded-full bg-red-600 text-white flex items-center justify-center text-xs font-bold shadow">
+            ×
+          </button>
+        </div>
+      `).join('');
+    }
+
+    function renderGeneralPhotos() {
+      const photos = state.generalPhotos;
+      const previewContainer = document.getElementById('general-photos-preview');
+      const iconEl = document.getElementById('icon-photo-general');
+      const labelEl = document.getElementById('label-photo-general');
+
+      if (photos.length === 0) {
+        previewContainer.classList.add('hidden');
+        previewContainer.innerHTML = '';
+        iconEl.classList.remove('text-red-600');
+        iconEl.classList.add('text-gray-800');
+        labelEl.classList.remove('text-red-600');
+        labelEl.textContent = 'Foto';
+        return;
+      }
+
+      iconEl.classList.remove('text-gray-800');
+      iconEl.classList.add('text-red-600');
+      labelEl.classList.add('text-red-600');
+      labelEl.textContent = `Foto (${photos.length}/5)`;
+
+      previewContainer.classList.remove('hidden');
+      previewContainer.innerHTML = photos.map((src, pIdx) => `
+        <div class="relative aspect-square rounded-lg overflow-hidden border border-gray-300 bg-gray-100">
+          <img src="${src}" alt="Foto Geral ${pIdx + 1}" onclick="openPhotoModal('general', ${pIdx})" class="w-full h-full object-cover cursor-pointer">
+          <button type="button" onclick="removePhoto('general', ${pIdx})" aria-label="Remover foto" class="absolute top-0.5 right-0.5 w-5 h-5 rounded-full bg-red-600 text-white flex items-center justify-center text-xs font-bold shadow">
+            ×
+          </button>
+        </div>
+      `).join('');
+    }
+
+    function removePhoto(target, photoIdx) {
+      if (target === 'general') {
+        state.generalPhotos.splice(photoIdx, 1);
+        renderGeneralPhotos();
+      } else {
+        state.items[target].photos.splice(photoIdx, 1);
+        renderItemPhotos(target);
+      }
+      closePhotoModal();
+    }
+
+    function openPhotoModal(target, photoIdx) {
+      const photos = target === 'general' ? state.generalPhotos : state.items[target].photos;
+      const title = target === 'general' ? 'Observações Gerais' : flatItemsList[target].label;
+
+      document.getElementById('photo-modal-title').textContent = title;
+      document.getElementById('photo-modal-img').src = photos[photoIdx];
+      document.getElementById('photo-modal-caption').textContent = `Foto ${photoIdx + 1} de ${photos.length}`;
+      document.getElementById('photo-modal-delete').onclick = () => removePhoto(target, photoIdx);
+      document.getElementById('photo-modal').classList.remove('hidden');
+    }
+
+    function closePhotoModal() {
+      document.getElementById('photo-modal').classList.add('hidden');
+    }
+
+    // =========================================================================
+    // 6. DIGITAL SIGNATURE CANVAS (TOUCH & MOUSE SUPPORT)
+    // =========================================================================
+    function initSignatureCanvases() {
+      ['operador'].forEach(role => {
+        const canvas = document.getElementById(`canvas-sig-${role}`);
+        const ctx = canvas.getContext('2d');
+        let isDrawing = false;
+        let hasStrokes = false;
+
+        const getCoords = (e) => {
+          const rect = canvas.getBoundingClientRect();
+          const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+          const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+          return {
+            x: clientX - rect.left,
+            y: clientY - rect.top
+          };
+        };
+
+        const startDraw = (e) => {
+          e.preventDefault();
+          isDrawing = true;
+          const { x, y } = getCoords(e);
+          ctx.beginPath();
+          ctx.moveTo(x, y);
+        };
+
+        const moveDraw = (e) => {
+          if (!isDrawing) return;
+          e.preventDefault();
+          const { x, y } = getCoords(e);
+          ctx.lineTo(x, y);
+          ctx.stroke();
+
+          if (!hasStrokes) {
+            hasStrokes = true;
+            document.getElementById(`placeholder-sig-${role}`).classList.add('hidden');
+            const card = document.getElementById(`card-sig-${role}`);
+            if (card) card.classList.remove('ring-2', 'ring-red-500');
+          }
+        };
+
+        const endDraw = () => {
+          if (!isDrawing) return;
+          isDrawing = false;
+          if (hasStrokes) {
+            state.signatures[role] = canvas.toDataURL('image/png');
+          }
+        };
+
+        canvas.addEventListener('mousedown', startDraw);
+        canvas.addEventListener('mousemove', moveDraw);
+        window.addEventListener('mouseup', endDraw);
+
+        canvas.addEventListener('touchstart', startDraw, { passive: false });
+        canvas.addEventListener('touchmove', moveDraw, { passive: false });
+        canvas.addEventListener('touchend', endDraw);
+
+        signaturePads[role] = {
+          canvas,
+          ctx,
+          setHasStrokes: (val) => { hasStrokes = val; }
+        };
+      });
+
+      window.addEventListener('resize', resizeAllSignatureCanvases);
+    }
+
+    function resizeAllSignatureCanvases() {
+      ['operador'].forEach(role => {
+        const pad = signaturePads[role];
+        if (!pad) return;
+        const { canvas, ctx } = pad;
+        const rect = canvas.getBoundingClientRect();
+        if (rect.width === 0) return;
+
+        const existingData = state.signatures[role];
+        const dpr = window.devicePixelRatio || 1;
+        canvas.width = rect.width * dpr;
+        canvas.height = rect.height * dpr;
+        ctx.scale(dpr, dpr);
+        ctx.lineWidth = 2.4;
+        ctx.lineCap = 'round';
+        ctx.lineJoin = 'round';
+        ctx.strokeStyle = '#111827';
+
+        if (existingData) {
+          const img = new Image();
+          img.onload = () => ctx.drawImage(img, 0, 0, rect.width, rect.height);
+          img.src = existingData;
+        }
+      });
+    }
+
+    function clearSignature(role) {
+      const pad = signaturePads[role];
+      if (!pad) return;
+      const { canvas, ctx, setHasStrokes } = pad;
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      setHasStrokes(false);
+      state.signatures[role] = null;
+      document.getElementById(`placeholder-sig-${role}`).classList.remove('hidden');
+    }
+
+    // =========================================================================
+    // 7. VALIDATION, SAVE & PDF GENERATION (jsPDF + AutoTable)
+    // =========================================================================
+    function validateAndSave() {
+      const template = CHECKLIST_TEMPLATES[state.type];
+
+      // 1. Validate Identification fields
+      if (!state.header.equipamento.trim()) {
+        return highlightAndScroll('card-equipamento', `Informe o ${template.equipLabel}.`);
+      }
+      if (!state.header.operador.trim()) {
+        return highlightAndScroll('card-operador', 'Informe o Nome do Operador.');
+      }
+      if (!state.header.horimetro.toString().trim()) {
+        return highlightAndScroll('card-horimetro', 'Informe o Horímetro do equipamento.');
+      }
+      if (!state.header.data || !state.header.horario) {
+        return highlightAndScroll('card-data-hora', 'Informe a Data e o Horário.');
+      }
+      if (!state.header.turno) {
+        return highlightAndScroll('card-turno', 'Selecione o Turno (1º, 2º ou 3º).');
+      }
+
+      // 2. Validate Checklist Items
+      for (let i = 0; i < flatItemsList.length; i++) {
+        const itemState = state.items[i];
+        if (!itemState.status) {
+          return highlightAndScroll(`item-card-${i}`, `Responda o item: "${flatItemsList[i].label}"`);
+        }
+        if (template.hasSeverity && itemState.status === 'NC' && !itemState.severity) {
+          return highlightAndScroll(`item-card-${i}`, `Selecione a gravidade (LEVE, MÉDIO ou GRAVE) para: "${flatItemsList[i].label}"`);
+        }
+      }
+
+      // 3. Validate Operator Signature
+      if (!state.signatures.operador) {
+        return highlightAndScroll('card-sig-operador', 'A assinatura do Operador / Responsável é obrigatória.');
+      }
+
+      // Build complete snapshot record
+      const record = buildInspectionRecord();
+
+      // Save to localStorage history
+      saveToHistory(record);
+
+      // Generate PDF Blob
+      const pdfResult = createChecklistPDF(record);
+      currentGeneratedPdfBlob = pdfResult.blob;
+      currentGeneratedPdfFilename = pdfResult.filename;
+
+      // Populate & Show Completion Modal
+      showCompletionModal(record);
+    }
+
+    function highlightAndScroll(elementId, message) {
+      const el = document.getElementById(elementId);
+      if (el) {
+        el.classList.add('ring-2', 'ring-red-500');
+        el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      }
+      showToast(message, 'error');
+    }
+
+    function buildInspectionRecord() {
+      const template = CHECKLIST_TEMPLATES[state.type];
+      let cCount = 0, ncCount = 0, naCount = 0;
+
+      const itemsSnapshot = flatItemsList.map(item => {
+        const st = state.items[item.index];
+        if (st.status === 'C') cCount++;
+        if (st.status === 'NC') ncCount++;
+        if (st.status === 'NA') naCount++;
+
+        return {
+          index: item.index,
+          section: item.section,
+          label: item.label,
+          status: st.status,
+          severity: st.severity || '',
+          comment: st.comment || '',
+          photos: [...st.photos]
+        };
+      });
+
+      return {
+        id: 'CHK-' + Date.now(),
+        createdAt: new Date().toISOString(),
+        type: state.type,
+        pdfTitle: template.pdfTitle,
+        docCode: template.docCode,
+        company: template.company,
+        equipLabel: template.equipLabel,
+        hasSeverity: template.hasSeverity,
+        header: { ...state.header },
+        items: itemsSnapshot,
+        counts: { c: cCount, nc: ncCount, na: naCount },
+        generalObs: state.generalObs,
+        generalPhotos: [...state.generalPhotos],
+        signatures: { ...state.signatures }
+      };
+    }
+
+    function createChecklistPDF(data) {
+      const { jsPDF } = window.jspdf;
+      const doc = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
+      const pageWidth = doc.internal.pageSize.getWidth();
+      const pageHeight = doc.internal.pageSize.getHeight();
+      const margin = 12;
+
+      // --- HEADER BANNER ---
+      doc.setFillColor(0, 121, 107); // #00796B
+      doc.rect(margin, 10, pageWidth - margin * 2, 18, 'F');
+
+      doc.setTextColor(255, 255, 255);
+      doc.setFont('helvetica', 'bold');
+      doc.setFontSize(13);
+      doc.text(data.pdfTitle, margin + 4, 18);
+
+      doc.setFont('helvetica', 'normal');
+      doc.setFontSize(8.5);
+      doc.text(data.company, margin + 4, 24);
+
+      doc.setFont('helvetica', 'bold');
+      doc.setFontSize(9);
+      doc.text(data.docCode, pageWidth - margin - 4, 18, { align: 'right' });
+      doc.setFont('helvetica', 'normal');
+      doc.setFontSize(8);
+      doc.text('Modall Check Digital', pageWidth - margin - 4, 24, { align: 'right' });
+
+      // --- IDENTIFICATION METADATA BOX ---
+      const formattedDate = data.header.data.split('-').reverse().join('/');
+      doc.setDrawColor(180, 180, 180);
+      doc.setFillColor(248, 250, 250);
+      doc.rect(margin, 30, pageWidth - margin * 2, 20, 'FD');
+
+      doc.setTextColor(33, 33, 33);
+      doc.setFontSize(8.5);
+
+      // Row 1
+      doc.setFont('helvetica', 'bold');
+      doc.text(`${data.equipLabel}:`, margin + 3, 36);
+      doc.setFont('helvetica', 'normal');
+      doc.text(String(data.header.equipamento), margin + 33, 36);
+
+      doc.setFont('helvetica', 'bold');
+      doc.text('Data:', margin + 78, 36);
+      doc.setFont('helvetica', 'normal');
+      doc.text(formattedDate, margin + 88, 36);
+
+      doc.setFont('helvetica', 'bold');
+      doc.text('Horário:', margin + 118, 36);
+      doc.setFont('helvetica', 'normal');
+      doc.text(data.header.horario, margin + 132, 36);
+
+      doc.setFont('helvetica', 'bold');
+      doc.text('Turno:', margin + 153, 36);
+      doc.setFont('helvetica', 'normal');
+      doc.text(data.header.turno, margin + 165, 36);
+
+      // Row 2
+      doc.setFont('helvetica', 'bold');
+      doc.text('Operador:', margin + 3, 44);
+      doc.setFont('helvetica', 'normal');
+      doc.text(String(data.header.operador), margin + 20, 44);
+
+      doc.setFont('helvetica', 'bold');
+      doc.text('Horímetro:', margin + 118, 44);
+      doc.setFont('helvetica', 'normal');
+      doc.text(String(data.header.horimetro), margin + 136, 44);
+
+      let currentY = 53;
+
+      // --- RTG MANDATORY WARNING BOX ---
+      if (data.type === 'RTG') {
+        doc.setFillColor(254, 243, 199);
+        doc.setDrawColor(217, 119, 6);
+        doc.rect(margin, currentY, pageWidth - margin * 2, 11, 'FD');
+        doc.setTextColor(120, 53, 15);
+        doc.setFont('helvetica', 'bold');
+        doc.setFontSize(7.5);
+        const warnLines = doc.splitTextToSize(
+          'ATENÇÃO: Fica estabelecido que o Operador do equipamento tem o direito e o dever de não operar em caso de identificação de pelo menos 01 item NÃO CONFORME (N.C).',
+          pageWidth - margin * 2 - 6
+        );
+        doc.text(warnLines, margin + 3, currentY + 4.5);
+        currentY += 14;
+      }
+
+      // --- ITEMS TABLE ---
+      const tableBody = [];
+      let lastSection = '';
+
+      data.items.forEach((item, idx) => {
+        if (data.type === 'RTG' && item.section !== lastSection) {
+          lastSection = item.section;
+          const colSpan = data.hasSeverity ? 5 : 4;
+          tableBody.push([{
+            content: item.section.toUpperCase(),
+            colSpan: colSpan,
+            styles: { fillColor: [224, 242, 241], textColor: [0, 77, 64], fontStyle: 'bold', fontSize: 8 }
+          }]);
+        }
+
+        const statusLabel = item.status === 'C' ? 'CONFORME' : item.status === 'NC' ? 'NÃO CONFORME' : 'N/A';
+        const obsParts = [];
+        if (item.comment) obsParts.push(item.comment);
+        if (item.photos && item.photos.length > 0) obsParts.push(`[${item.photos.length} foto(s) em anexo]`);
+
+        if (data.hasSeverity) {
+          tableBody.push([
+            `${idx + 1}. ${item.label}`,
+            statusLabel,
+            item.severity || '-',
+            obsParts.join(' ') || '-'
+          ]);
+        } else {
+          tableBody.push([
+            `${idx + 1}. ${item.label}`,
+            statusLabel,
+            obsParts.join(' ') || '-'
+          ]);
+        }
+      });
+
+      const tableHead = data.hasSeverity
+        ? [['Item de Verificação', 'Status', 'Gravidade', 'Observação']]
+        : [['Item de Verificação', 'Status', 'Observação']];
+
+      const colStyles = data.hasSeverity
+        ? {
+            0: { cellWidth: 78 },
+            1: { cellWidth: 28, halign: 'center', fontStyle: 'bold' },
+            2: { cellWidth: 22, halign: 'center', fontStyle: 'bold' },
+            3: { cellWidth: 'auto' }
+          }
+        : {
+            0: { cellWidth: 92 },
+            1: { cellWidth: 30, halign: 'center', fontStyle: 'bold' },
+            2: { cellWidth: 'auto' }
+          };
+
+      doc.autoTable({
+        startY: currentY,
+        head: tableHead,
+        body: tableBody,
+        margin: { left: margin, right: margin },
+        theme: 'grid',
+        headStyles: {
+          fillColor: [0, 121, 107],
+          textColor: [255, 255, 255],
+          fontStyle: 'bold',
+          fontSize: 8
+        },
+        styles: {
+          fontSize: 7.5,
+          cellPadding: 2,
+          valign: 'middle',
+          lineColor: [200, 200, 200],
+          lineWidth: 0.2
+        },
+        columnStyles: colStyles,
+        didParseCell: function (hookData) {
+          if (hookData.section === 'body' && hookData.column.index === 1) {
+            const val = hookData.cell.raw;
+            if (val === 'CONFORME') {
+              hookData.cell.styles.textColor = [46, 125, 50];
+            } else if (val === 'NÃO CONFORME') {
+              hookData.cell.styles.textColor = [198, 40, 40];
+              hookData.cell.styles.fillColor = [254, 242, 242];
+            } else if (val === 'N/A') {
+              hookData.cell.styles.textColor = [84, 110, 122];
+            }
+          }
+          if (data.hasSeverity && hookData.section === 'body' && hookData.column.index === 2) {
+            const sev = hookData.cell.raw;
+            if (sev === 'GRAVE') hookData.cell.styles.textColor = [198, 40, 40];
+            if (sev === 'MÉDIO') hookData.cell.styles.textColor = [217, 119, 6];
+            if (sev === 'LEVE') hookData.cell.styles.textColor = [161, 98, 7];
+          }
+        }
+      });
+
+      currentY = doc.lastAutoTable.finalY + 6;
+
+      // --- GENERAL OBSERVATIONS ---
+      if (data.generalObs && data.generalObs.trim()) {
+        if (currentY > pageHeight - 55) {
+          doc.addPage();
+          currentY = 15;
+        }
+        doc.setFont('helvetica', 'bold');
+        doc.setFontSize(8.5);
+        doc.setTextColor(33, 33, 33);
+        doc.text('OBSERVAÇÕES GERAIS:', margin, currentY);
+        currentY += 4;
+
+        doc.setFont('helvetica', 'normal');
+        doc.setFontSize(8);
+        const obsLines = doc.splitTextToSize(data.generalObs.trim(), pageWidth - margin * 2 - 4);
+        const boxHeight = Math.max(10, obsLines.length * 4 + 4);
+        doc.setDrawColor(180, 180, 180);
+        doc.rect(margin, currentY, pageWidth - margin * 2, boxHeight);
+        doc.text(obsLines, margin + 2, currentY + 4.5);
+        currentY += boxHeight + 6;
+      }
+
+      // --- SIGNATURE BLOCK (SINGLE CENTERED OPERATOR SIGNATURE) ---
+      if (currentY > pageHeight - 42) {
+        doc.addPage();
+        currentY = 15;
+      }
+
+      const sigBoxWidth = 90;
+      const sigBoxHeight = 30;
+      const sigX = (pageWidth - sigBoxWidth) / 2;
+
+      doc.setDrawColor(160, 160, 160);
+      doc.rect(sigX, currentY, sigBoxWidth, sigBoxHeight);
+
+      if (data.signatures.operador) {
+        try {
+          doc.addImage(data.signatures.operador, 'PNG', sigX + 4, currentY + 2, sigBoxWidth - 8, sigBoxHeight - 9);
+        } catch (e) {
+          console.warn('Erro ao inserir assinatura no PDF:', e);
+        }
+      }
+
+      doc.setDrawColor(100, 100, 100);
+      doc.line(sigX + 6, currentY + sigBoxHeight - 6, sigX + sigBoxWidth - 6, currentY + sigBoxHeight - 6);
+      doc.setFont('helvetica', 'bold');
+      doc.setFontSize(8);
+      doc.setTextColor(50, 50, 50);
+      doc.text('Assinatura do Operador / Responsável', sigX + sigBoxWidth / 2, currentY + sigBoxHeight - 2, { align: 'center' });
+
+      currentY += sigBoxHeight + 8;
+
+      // --- PHOTOGRAPHIC EVIDENCE APPENDIX (GRID) ---
+      const allPhotos = [];
+      data.items.forEach((item, idx) => {
+        if (item.photos && item.photos.length > 0) {
+          item.photos.forEach((pData, pIdx) => {
+            allPhotos.push({
+              title: `Item ${idx + 1}: ${item.label} (Foto ${pIdx + 1}/${item.photos.length})`,
+              status: item.status === 'NC' ? 'NÃO CONFORME' : item.status === 'C' ? 'CONFORME' : 'N/A',
+              dataUrl: pData
+            });
+          });
+        }
+      });
+
+      if (data.generalPhotos && data.generalPhotos.length > 0) {
+        data.generalPhotos.forEach((pData, pIdx) => {
+          allPhotos.push({
+            title: `Observações Gerais (Foto ${pIdx + 1}/${data.generalPhotos.length})`,
+            status: 'GERAL',
+            dataUrl: pData
+          });
+        });
+      }
+
+      if (allPhotos.length > 0) {
+        doc.addPage();
+        let photoY = 15;
+
+        doc.setFillColor(0, 121, 107);
+        doc.rect(margin, photoY, pageWidth - margin * 2, 10, 'F');
+        doc.setTextColor(255, 255, 255);
+        doc.setFont('helvetica', 'bold');
+        doc.setFontSize(10);
+        doc.text(`REGISTRO FOTOGRÁFICO (${allPhotos.length} Evidência${allPhotos.length > 1 ? 's' : ''})`, margin + 4, photoY + 6.8);
+        photoY += 15;
+
+        const cardW = (pageWidth - margin * 2 - 6) / 2;
+        const cardH = 68;
+
+        allPhotos.forEach((photo, idx) => {
+          const col = idx % 2;
+          if (col === 0 && photoY + cardH > pageHeight - 12) {
+            doc.addPage();
+            photoY = 15;
+          }
+
+          const cardX = margin + col * (cardW + 6);
+
+          doc.setDrawColor(200, 200, 200);
+          doc.setFillColor(250, 250, 250);
+          doc.rect(cardX, photoY, cardW, cardH, 'FD');
+
+          try {
+            doc.addImage(photo.dataUrl, 'JPEG', cardX + 2, photoY + 2, cardW - 4, cardH - 15);
+          } catch (e) {
+            console.warn('Erro ao inserir foto no PDF:', e);
+          }
+
+          doc.setFont('helvetica', 'bold');
+          doc.setFontSize(7);
+          doc.setTextColor(40, 40, 40);
+          const capLines = doc.splitTextToSize(photo.title, cardW - 4);
+          doc.text(capLines.slice(0, 2), cardX + 2, photoY + cardH - 9);
+
+          if (col === 1 || idx === allPhotos.length - 1) {
+            photoY += cardH + 5;
+          }
+        });
+      }
+
+      // Page footers
+      const totalPages = doc.internal.getNumberOfPages();
+      for (let p = 1; p <= totalPages; p++) {
+        doc.setPage(p);
+        doc.setFont('helvetica', 'normal');
+        doc.setFontSize(7.5);
+        doc.setTextColor(130, 130, 130);
+        doc.text(
+          `Gerado via Modall Check • ${formattedDate} ${data.header.horario} • Página ${p} de ${totalPages}`,
+          pageWidth / 2,
+          pageHeight - 6,
+          { align: 'center' }
+        );
+      }
+
+      const safeEquip = data.header.equipamento.replace(/[^a-zA-Z0-9_-]/g, '_');
+      const filename = `CheckList_${data.type}_${safeEquip}_${data.header.data}.pdf`;
+      const blob = doc.output('blob');
+
+      return { blob, filename };
+    }
+
+    function showCompletionModal(record) {
+      document.getElementById('summary-subtitle').textContent =
+        `${record.pdfTitle} • ${record.header.equipamento} • Turno ${record.header.turno}`;
+      document.getElementById('count-conforme').textContent = record.counts.c;
+      document.getElementById('count-nc').textContent = record.counts.nc;
+      document.getElementById('count-na').textContent = record.counts.na;
+
+      const ncAlert = document.getElementById('summary-nc-alert');
+      if (record.counts.nc > 0) {
+        ncAlert.classList.remove('hidden');
+      } else {
+        ncAlert.classList.add('hidden');
+      }
+
+      document.getElementById('completion-modal').classList.remove('hidden');
+    }
+
+    function startNewChecklistFromModal() {
+      document.getElementById('completion-modal').classList.add('hidden');
+      goHome();
+    }
+
+    // =========================================================================
+    // 8. PDF SHARING (WEB SHARE API) & DOWNLOAD
+    // =========================================================================
+    async function shareGeneratedPDF() {
+      if (!currentGeneratedPdfBlob) return;
+
+      const pdfFile = new File([currentGeneratedPdfBlob], currentGeneratedPdfFilename, {
+        type: 'application/pdf'
+      });
+
+      if (navigator.canShare && navigator.canShare({ files: [pdfFile] })) {
+        try {
+          await navigator.share({
+            title: 'Relatório Modall Check',
+            text: `Check-list digital concluído: ${currentGeneratedPdfFilename}`,
+            files: [pdfFile]
+          });
+          showToast('Compartilhamento concluído!', 'success');
+        } catch (err) {
+          if (err.name !== 'AbortError') {
+            console.warn('Erro ao compartilhar:', err);
+            downloadGeneratedPDF();
+            showToast('Compartilhamento direto indisponível. PDF baixado no dispositivo.', 'info');
+          }
+        }
+      } else {
+        downloadGeneratedPDF();
+        showToast('Seu navegador não suporta envio direto de arquivos. O PDF foi baixado para você anexar na mídia.', 'info');
+      }
+    }
+
+    function downloadGeneratedPDF() {
+      if (!currentGeneratedPdfBlob) return;
+      const url = URL.createObjectURL(currentGeneratedPdfBlob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = currentGeneratedPdfFilename;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      setTimeout(() => URL.revokeObjectURL(url), 1000);
+      showToast('PDF baixado com sucesso!', 'success');
+    }
+
+    // =========================================================================
+    // 9. LOCAL STORAGE HISTORY
+    // =========================================================================
+    const HISTORY_KEY = 'modall_check_history_v1';
+
+    function saveToHistory(record) {
+      try {
+        const lightRecord = {
+          ...record,
+          items: record.items.map(it => ({ ...it, photos: [] })),
+          generalPhotos: []
+        };
+        const existing = JSON.parse(localStorage.getItem(HISTORY_KEY) || '[]');
+        existing.unshift(lightRecord);
+        const trimmed = existing.slice(0, 15);
+        localStorage.setItem(HISTORY_KEY, JSON.stringify(trimmed));
+      } catch (e) {
+        console.warn('Erro ao salvar histórico:', e);
+      }
+    }
+
+    function renderHistory() {
+      const listEl = document.getElementById('history-list');
+      const clearBtn = document.getElementById('btn-clear-history');
+      let history = [];
+      try {
+        history = JSON.parse(localStorage.getItem(HISTORY_KEY) || '[]');
+      } catch (e) {
+        history = [];
+      }
+
+      if (history.length === 0) {
+        clearBtn.classList.add('hidden');
+        listEl.innerHTML = `
+          <div class="modall-card p-6 text-center text-gray-400">
+            <p class="text-sm font-medium">Nenhum check-list realizado ainda.</p>
+            <p class="text-xs mt-1">Os relatórios salvos aparecerão aqui para consulta e reenvio.</p>
+          </div>
+        `;
+        return;
+      }
+
+      clearBtn.classList.remove('hidden');
+      listEl.innerHTML = history.map((rec, idx) => {
+        const formattedDate = rec.header.data.split('-').reverse().join('/');
+        const hasNC = rec.counts.nc > 0;
+        return `
+          <div class="modall-card p-4 flex items-center justify-between gap-3">
+            <div class="min-w-0 flex-1">
+              <div class="flex items-center gap-2">
+                <span class="text-[11px] font-bold px-2 py-0.5 rounded bg-[#00796B]/10 text-[#00796B]">${rec.type}</span>
+                <span class="text-sm font-bold text-gray-800 truncate">${rec.header.equipamento}</span>
+                ${hasNC
+                  ? `<span class="text-[10px] font-bold px-1.5 py-0.5 rounded bg-red-100 text-red-700">${rec.counts.nc} N/C</span>`
+                  : `<span class="text-[10px] font-bold px-1.5 py-0.5 rounded bg-green-100 text-green-700">100% OK</span>`
+                }
+              </div>
+              <p class="text-xs text-gray-500 mt-1 truncate">Op: ${rec.header.operador} • Turno ${rec.header.turno}</p>
+              <p class="text-[11px] text-gray-400 mt-0.5">${formattedDate} às ${rec.header.horario} • Horímetro: ${rec.header.horimetro}</p>
+            </div>
+            <div class="flex items-center gap-1.5 shrink-0">
+              <button onclick="reopenHistoryPDF(${idx}, 'share')" title="Compartilhar PDF" class="p-2.5 rounded-xl bg-[#25D366]/15 text-[#1DA851] hover:bg-[#25D366]/25 active:scale-95 transition">
+                <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+                  <path d="M18 16.08c-.76 0-1.44.3-1.96.77L8.91 12.7c.05-.23.09-.46.09-.7s-.04-.47-.09-.7l7.05-4.11c.54.5 1.25.81 2.04.81 1.66 0 3-1.34 3-3s-1.34-3-3-3-3 1.34-3 3c0 .24.04.47.09.7L8.04 9.81C7.5 9.31 6.79 9 6 9c-1.66 0-3 1.34-3 3s1.34 3 3 3c.79 0 1.5-.31 2.04-.81l7.12 4.16c-.05.21-.08.43-.08.65 0 1.61 1.31 2.92 2.92 2.92s2.92-1.31 2.92-2.92c0-1.61-1.31-2.92-2.92-2.92z"/>
+                </svg>
+              </button>
+              <button onclick="reopenHistoryPDF(${idx}, 'download')" title="Baixar PDF" class="p-2.5 rounded-xl bg-[#00796B]/10 text-[#00796B] hover:bg-[#00796B]/20 active:scale-95 transition">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/>
+                </svg>
+              </button>
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    function reopenHistoryPDF(historyIndex, action) {
+      try {
+        const history = JSON.parse(localStorage.getItem(HISTORY_KEY) || '[]');
+        const record = history[historyIndex];
+        if (!record) return;
+
+        const pdfResult = createChecklistPDF(record);
+        currentGeneratedPdfBlob = pdfResult.blob;
+        currentGeneratedPdfFilename = pdfResult.filename;
+
+        if (action === 'share') {
+          shareGeneratedPDF();
+        } else {
+          downloadGeneratedPDF();
+        }
+      } catch (e) {
+        showToast('Erro ao gerar PDF do histórico.', 'error');
+      }
+    }
+
+    function clearHistory() {
+      localStorage.removeItem(HISTORY_KEY);
+      renderHistory();
+      showToast('Histórico limpo.', 'info');
+    }
+
+    // =========================================================================
+    // 10. CUSTOM TOAST NOTIFICATION (REPLACES alert())
+    // =========================================================================
+    let toastTimeout = null;
+    function showToast(message, type = 'info') {
+      const box = document.getElementById('toast-box');
+      const msgEl = document.getElementById('toast-message');
+      const iconEl = document.getElementById('toast-icon');
+
+      const icons = {
+        success: '<svg class="w-5 h-5 text-green-400" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>',
+        error: '<svg class="w-5 h-5 text-red-400" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>',
+        warning: '<svg class="w-5 h-5 text-amber-400" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>',
+        info: '<svg class="w-5 h-5 text-teal-300" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>'
+      };
+
+      iconEl.innerHTML = icons[type] || icons.info;
+      msgEl.textContent = message;
+      box.classList.remove('hidden');
+
+      if (toastTimeout) clearTimeout(toastTimeout);
+      toastTimeout = setTimeout(hideToast, 4200);
+    }
+
+    function hideToast() {
+      document.getElementById('toast-box').classList.add('hidden');
+    }
+  </script>
+</body>
+</html>
