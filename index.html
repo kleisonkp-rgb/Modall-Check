@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>Modall Check - Inspeção Digital</title>
+  <title>Modall Check - ATR Logística</title>
   
   <!-- Tailwind CSS -->
   <script src="https://cdn.tailwindcss.com"></script>
@@ -11,7 +11,7 @@
   <!-- Google Fonts: Inter -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:ital,wght@0,400;0,500;0,600;0,700;0,800;1,800;1,900&display=swap" rel="stylesheet">
   
   <!-- jsPDF & jsPDF-AutoTable via CDN -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
@@ -20,7 +20,7 @@
   <style>
     body {
       font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
-      background-color: #E0E0E0;
+      background-color: #E5E7EB;
       color: #212121;
       -webkit-tap-highlight-color: transparent;
       overscroll-behavior-y: contain;
@@ -61,7 +61,7 @@
     }
     .modall-underline-input:focus {
       outline: none;
-      border-bottom: 2px solid #00796B;
+      border-bottom: 2px solid #0D8A72;
     }
 
     /* Status buttons default & active states */
@@ -102,9 +102,9 @@
       transition: all 0.15s ease;
     }
     .turno-btn-active {
-      background-color: #00796B !important;
+      background-color: #0D8A72 !important;
       color: #FFFFFF !important;
-      box-shadow: 0 3px 8px rgba(0, 121, 107, 0.35);
+      box-shadow: 0 3px 8px rgba(13, 138, 114, 0.35);
     }
 
     /* Signature canvas touch handling */
@@ -129,27 +129,42 @@
 <body class="min-h-screen flex flex-col">
 
   <!-- TOP HEADER BAR -->
-  <header class="sticky top-0 z-40 bg-[#00796B] text-white shadow-md">
-    <div class="max-w-xl mx-auto px-4 h-14 flex items-center justify-between">
-      <div class="flex items-center gap-3 overflow-hidden">
-        <button id="btn-back" onclick="goHome()" class="hidden p-2 -ml-2 rounded-full hover:bg-[#00695C] active:bg-[#004D40] transition" aria-label="Voltar">
+  <header class="sticky top-0 z-40 bg-[#0D8A72] text-white shadow-md">
+    <div class="max-w-xl mx-auto px-4 h-14 flex items-center justify-between gap-2">
+      <div class="flex items-center gap-2.5 overflow-hidden">
+        <button id="btn-back" onclick="goHome()" class="hidden p-2 -ml-2 rounded-full hover:bg-[#0A705C] active:bg-[#085A4A] transition shrink-0" aria-label="Voltar">
           <svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" d="M10 19l-7-7m0 0l7-7m-7 7h18"/>
           </svg>
         </button>
-        <div id="header-logo" class="flex items-center gap-2">
-          <div class="w-8 h-8 rounded-lg bg-white/15 flex items-center justify-center">
-            <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+
+        <!-- Embedded Official ATR Logística Mini Badge + App Title -->
+        <div id="header-brand" class="flex items-center gap-2.5 min-w-0">
+          <div class="bg-white rounded-md px-1.5 py-1 shadow-xs shrink-0 flex items-center justify-center">
+            <svg width="86" height="22" viewBox="0 0 860 220" xmlns="http://www.w3.org/2000/svg" aria-label="ATR Logística">
+              <!-- Royal Blue Angled Banner -->
+              <polygon points="62,10 850,10 850,210 12,210" fill="#212A9C"/>
+              <!-- Two Diagonal White Stripes cutting left side -->
+              <polygon points="75,10 91,10 41,210 25,210" fill="#FFFFFF"/>
+              <polygon points="103,10 119,10 69,210 53,210" fill="#FFFFFF"/>
+              <!-- Horizontal White Stripe near bottom -->
+              <rect x="12" y="164" width="838" height="10" fill="#FFFFFF"/>
+              <!-- ATR Bold Italic Red Letters with Thick White Outline -->
+              <g font-family="Arial Black, Impact, Inter, sans-serif" font-weight="900" font-style="italic" font-size="136" letter-spacing="-3">
+                <text x="112" y="150" fill="none" stroke="#FFFFFF" stroke-width="18" stroke-linejoin="round">ATR</text>
+                <text x="112" y="150" fill="#EE2722">ATR</text>
+              </g>
+              <!-- LOGÍSTICA Bold Italic White Letters -->
+              <text x="415" y="148" fill="#FFFFFF" font-family="Arial Black, Inter, sans-serif" font-weight="900" font-style="italic" font-size="82" letter-spacing="1">LOGÍSTICA</text>
             </svg>
           </div>
-          <h1 id="header-title" class="text-lg font-semibold tracking-tight truncate">Modall Check</h1>
+          <h1 id="header-title" class="text-base sm:text-lg font-semibold tracking-tight truncate">Modall Check</h1>
         </div>
       </div>
 
       <!-- Quick Fill Test Button (Visible only during form inspection) -->
-      <div id="header-actions" class="hidden flex items-center gap-1">
-        <button onclick="quickFillTest()" title="Preencher Tudo Conforme (Teste Rápido)" class="text-xs bg-[#00695C] hover:bg-[#004D40] active:scale-95 text-white/95 border border-white/25 px-2.5 py-1.5 rounded-lg font-medium flex items-center gap-1 transition">
+      <div id="header-actions" class="hidden flex items-center gap-1 shrink-0">
+        <button onclick="quickFillTest()" title="Preencher Tudo Conforme (Teste Rápido)" class="text-xs bg-[#0A705C] hover:bg-[#085A4A] active:scale-95 text-white/95 border border-white/25 px-2.5 py-1.5 rounded-lg font-medium flex items-center gap-1 transition">
           <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/>
           </svg>
@@ -159,8 +174,8 @@
     </div>
 
     <!-- Progress bar inside form view -->
-    <div id="progress-container" class="hidden w-full bg-[#004D40] h-1.5">
-      <div id="progress-bar" class="bg-[#4DB6AC] h-1.5 transition-all duration-300" style="width: 0%"></div>
+    <div id="progress-container" class="hidden w-full bg-[#085A4A] h-1.5">
+      <div id="progress-bar" class="bg-[#5EEAD4] h-1.5 transition-all duration-300" style="width: 0%"></div>
     </div>
   </header>
 
@@ -169,53 +184,66 @@
 
     <!-- ==================== VIEW 1: HOME SELECTION ==================== -->
     <section id="view-home" class="space-y-4">
-      <!-- Welcome Card -->
-      <div class="modall-card p-5 border-l-4 border-[#00796B]">
-        <div class="flex items-center justify-between">
+      <!-- Welcome Card with Official ATR Logística Logo -->
+      <div class="modall-card p-5 border-l-4 border-[#212A9C]">
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
           <div>
-            <span class="text-xs font-bold uppercase tracking-wider text-[#00796B]">Operação Portuária & Logística</span>
-            <h2 class="text-xl font-bold text-gray-800 mt-0.5">Selecione o Check-List</h2>
-            <p class="text-sm text-gray-500 mt-1">Preenchimento digital rápido com evidências fotográficas e assinatura.</p>
+            <!-- Crisp Full Official ATR Logística SVG Logo -->
+            <div class="mb-2.5 inline-block">
+              <svg class="h-10 w-auto" viewBox="0 0 860 220" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Logo ATR Logística">
+                <polygon points="62,10 850,10 850,210 12,210" fill="#212A9C"/>
+                <polygon points="75,10 91,10 41,210 25,210" fill="#FFFFFF"/>
+                <polygon points="103,10 119,10 69,210 53,210" fill="#FFFFFF"/>
+                <rect x="12" y="164" width="838" height="10" fill="#FFFFFF"/>
+                <g font-family="Arial Black, Impact, Inter, sans-serif" font-weight="900" font-style="italic" font-size="136" letter-spacing="-3">
+                  <text x="112" y="150" fill="none" stroke="#FFFFFF" stroke-width="18" stroke-linejoin="round">ATR</text>
+                  <text x="112" y="150" fill="#EE2722">ATR</text>
+                </g>
+                <text x="415" y="148" fill="#FFFFFF" font-family="Arial Black, Inter, sans-serif" font-weight="900" font-style="italic" font-size="82" letter-spacing="1">LOGÍSTICA</text>
+              </svg>
+            </div>
+            <h2 class="text-xl font-bold text-gray-800">Selecione o Check-List</h2>
+            <p class="text-sm text-gray-500 mt-0.5">Inspeção digital de equipamentos com evidências fotográficas e assinatura.</p>
           </div>
         </div>
       </div>
 
       <!-- Checklist Option A: RTG -->
-      <button onclick="startChecklist('RTG')" class="w-full text-left modall-card p-5 hover:ring-2 hover:ring-[#00796B] active:scale-[0.99] transition flex items-center gap-4 group">
-        <div class="w-14 h-14 rounded-2xl bg-[#00796B]/10 text-[#00796B] flex items-center justify-center shrink-0 group-hover:bg-[#00796B] group-hover:text-white transition">
+      <button onclick="startChecklist('RTG')" class="w-full text-left modall-card p-5 hover:ring-2 hover:ring-[#0D8A72] active:scale-[0.99] transition flex items-center gap-4 group">
+        <div class="w-14 h-14 rounded-2xl bg-[#0D8A72]/10 text-[#0D8A72] flex items-center justify-center shrink-0 group-hover:bg-[#0D8A72] group-hover:text-white transition">
           <svg class="w-8 h-8" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" d="M3 21h18M5 21V7l7-4 7 4v14M9 21v-6h6v6M4 7h16M8 11h8"/>
           </svg>
         </div>
         <div class="flex-1 min-w-0">
           <div class="flex items-center gap-2">
-            <span class="text-[11px] font-bold px-2 py-0.5 rounded bg-[#00796B]/15 text-[#00796B]">ATR 8.5.04A REV00</span>
+            <span class="text-[11px] font-bold px-2 py-0.5 rounded bg-[#0D8A72]/15 text-[#0D8A72]">ATR 8.5.04A REV00</span>
             <span class="text-[11px] font-medium text-gray-400">45 itens</span>
           </div>
           <h3 class="text-lg font-bold text-gray-800 mt-1">Check List - RTG</h3>
           <p class="text-xs text-gray-500 mt-0.5">Pórtico sobre Pneus • Segurança, Térreo, Ergonomia, Operacional e Spread</p>
         </div>
-        <svg class="w-6 h-6 text-gray-400 group-hover:text-[#00796B] shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+        <svg class="w-6 h-6 text-gray-400 group-hover:text-[#0D8A72] shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
           <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/>
         </svg>
       </button>
 
       <!-- Checklist Option B: Empilhadeira de Cheio / Reach Stacker -->
-      <button onclick="startChecklist('RS')" class="w-full text-left modall-card p-5 hover:ring-2 hover:ring-[#00796B] active:scale-[0.99] transition flex items-center gap-4 group">
-        <div class="w-14 h-14 rounded-2xl bg-[#00796B]/10 text-[#00796B] flex items-center justify-center shrink-0 group-hover:bg-[#00796B] group-hover:text-white transition">
+      <button onclick="startChecklist('RS')" class="w-full text-left modall-card p-5 hover:ring-2 hover:ring-[#0D8A72] active:scale-[0.99] transition flex items-center gap-4 group">
+        <div class="w-14 h-14 rounded-2xl bg-[#0D8A72]/10 text-[#0D8A72] flex items-center justify-center shrink-0 group-hover:bg-[#0D8A72] group-hover:text-white transition">
           <svg class="w-8 h-8" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" d="M4 17a2 2 0 104 0 2 2 0 00-4 0zm10 0a2 2 0 104 0 2 2 0 00-4 0zM6 15V9h6l3 4v2m3-8l-5 5m5-5h3v3"/>
           </svg>
         </div>
         <div class="flex-1 min-w-0">
           <div class="flex items-center gap-2">
-            <span class="text-[11px] font-bold px-2 py-0.5 rounded bg-[#00796B]/15 text-[#00796B]">ALFA 8.5.04E / Rev.00</span>
+            <span class="text-[11px] font-bold px-2 py-0.5 rounded bg-[#0D8A72]/15 text-[#0D8A72]">ALFA 8.5.04E / Rev.00</span>
             <span class="text-[11px] font-medium text-gray-400">29 itens</span>
           </div>
           <h3 class="text-lg font-bold text-gray-800 mt-1 leading-snug">Check List - Empilhadeira de Cheio / Reach Stacker</h3>
           <p class="text-xs text-gray-500 mt-0.5">Terex / Reach Stacker • Com classificação de gravidade (Leve, Médio, Grave)</p>
         </div>
-        <svg class="w-6 h-6 text-gray-400 group-hover:text-[#00796B] shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+        <svg class="w-6 h-6 text-gray-400 group-hover:text-[#0D8A72] shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
           <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/>
         </svg>
       </button>
@@ -224,7 +252,7 @@
       <div class="pt-2">
         <div class="flex items-center justify-between px-1 mb-2">
           <h3 class="text-sm font-bold text-gray-700 uppercase tracking-wide flex items-center gap-1.5">
-            <svg class="w-4 h-4 text-[#00796B]" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <svg class="w-4 h-4 text-[#0D8A72]" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
             </svg>
             Histórico Recente
@@ -239,18 +267,6 @@
 
     <!-- ==================== VIEW 2: CHECKLIST FORM ==================== -->
     <section id="view-form" class="hidden space-y-3.5">
-
-      <!-- RTG Mandatory Safety Alert Banner -->
-      <div id="rtg-alert-banner" class="hidden bg-amber-50 border-l-4 border-amber-600 rounded-xl p-4 shadow-sm">
-        <div class="flex items-start gap-3">
-          <svg class="w-6 h-6 text-amber-600 shrink-0 mt-0.5" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
-          </svg>
-          <p class="text-xs sm:text-sm font-semibold text-amber-950 leading-relaxed">
-            <span class="font-extrabold uppercase">ATENÇÃO:</span> O Operador tem o direito e o dever de não operar em caso de identificação de pelo menos 01 item NÃO CONFORME (N.C).
-          </p>
-        </div>
-      </div>
 
       <!-- IDENTIFICATION CARDS -->
       <div id="identification-cards" class="space-y-3.5">
@@ -371,7 +387,7 @@
 
         <!-- Primary Save Button -->
         <div class="pt-2">
-          <button type="button" onclick="validateAndSave()" class="w-full bg-[#00796B] hover:bg-[#00695C] active:scale-[0.99] text-white font-bold text-base py-4 rounded-2xl shadow-lg transition tracking-wide uppercase">
+          <button type="button" onclick="validateAndSave()" class="w-full bg-[#0D8A72] hover:bg-[#0A705C] active:scale-[0.99] text-white font-bold text-base py-4 rounded-2xl shadow-lg transition tracking-wide uppercase">
             SALVAR
           </button>
         </div>
@@ -392,7 +408,7 @@
   <!-- ==================== PHOTO LIGHTBOX MODAL ==================== -->
   <div id="photo-modal" class="fixed inset-0 z-50 hidden bg-black/85 flex flex-col items-center justify-center p-4" onclick="closePhotoModal()">
     <div class="relative max-w-lg w-full bg-white rounded-2xl overflow-hidden shadow-2xl" onclick="event.stopPropagation()">
-      <div class="flex items-center justify-between px-4 py-3 bg-[#00796B] text-white">
+      <div class="flex items-center justify-between px-4 py-3 bg-[#0D8A72] text-white">
         <span id="photo-modal-title" class="text-sm font-semibold truncate">Evidência Fotográfica</span>
         <button onclick="closePhotoModal()" class="p-1 rounded-lg hover:bg-white/20">
           <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24">
@@ -414,9 +430,9 @@
 
   <!-- ==================== COMPLETION & PDF SHARE MODAL ==================== -->
   <div id="completion-modal" class="fixed inset-0 z-50 hidden bg-black/70 backdrop-blur-xs flex items-end sm:items-center justify-center p-0 sm:p-4">
-    <div class="bg-white w-full max-w-md rounded-t-3xl sm:rounded-2xl shadow-2xl overflow-hidden animate-slide-up">
+    <div class="bg-white w-full max-w-md rounded-t-3xl sm:rounded-2xl shadow-2xl overflow-hidden">
       <!-- Modal Header -->
-      <div class="bg-[#00796B] text-white p-5 text-center">
+      <div class="bg-[#0D8A72] text-white p-5 text-center">
         <div class="w-12 h-12 rounded-full bg-white/20 mx-auto flex items-center justify-center mb-2">
           <svg class="w-7 h-7 text-white" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/>
@@ -459,7 +475,7 @@
             <span>Compartilhar PDF (WhatsApp / Mídia)</span>
           </button>
 
-          <button type="button" onclick="downloadGeneratedPDF()" class="w-full bg-[#00796B] hover:bg-[#00695C] active:scale-[0.99] text-white font-bold py-3.5 px-4 rounded-xl shadow-md flex items-center justify-center gap-2.5 transition">
+          <button type="button" onclick="downloadGeneratedPDF()" class="w-full bg-[#0D8A72] hover:bg-[#0A705C] active:scale-[0.99] text-white font-bold py-3.5 px-4 rounded-xl shadow-md flex items-center justify-center gap-2.5 transition">
             <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/>
             </svg>
@@ -476,7 +492,82 @@
 
   <script>
     // =========================================================================
-    // 1. CHECKLIST DATA DEFINITIONS (EXACT EXTRACTION FROM PROVIDED PDFs)
+    // 1. OFFICIAL ATR LOGÍSTICA HIGH-RES LOGO GENERATOR (FOR PDF EMBEDDING)
+    // =========================================================================
+    // Renders the exact official ATR LOGÍSTICA logo onto a high-DPI HTML5 Canvas
+    // (Royal Blue #212A9C angled banner, two diagonal white stripes, horizontal
+    // white bottom bar, italic red #EE2722 'ATR' with thick white stroke, and
+    // italic white 'LOGÍSTICA') so jsPDF embeds it crisply on every report.
+    function getOfficialATRLogoDataURL() {
+      const canvas = document.createElement('canvas');
+      canvas.width = 1200;
+      canvas.height = 310;
+      const ctx = canvas.getContext('2d');
+
+      // White background card so it stands out cleanly on any header bar
+      ctx.fillStyle = '#FFFFFF';
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+      // Royal Blue Angled-Left Banner (#212A9C)
+      ctx.fillStyle = '#212A9C';
+      ctx.beginPath();
+      ctx.moveTo(92, 22);
+      ctx.lineTo(1178, 22);
+      ctx.lineTo(1178, 288);
+      ctx.lineTo(22, 288);
+      ctx.closePath();
+      ctx.fill();
+
+      // Two Diagonal White Stripes cutting through the left side
+      ctx.fillStyle = '#FFFFFF';
+      // Stripe 1
+      ctx.beginPath();
+      ctx.moveTo(110, 22);
+      ctx.lineTo(132, 22);
+      ctx.lineTo(62, 288);
+      ctx.lineTo(40, 288);
+      ctx.closePath();
+      ctx.fill();
+
+      // Stripe 2
+      ctx.beginPath();
+      ctx.moveTo(148, 22);
+      ctx.lineTo(170, 22);
+      ctx.lineTo(100, 288);
+      ctx.lineTo(78, 288);
+      ctx.closePath();
+      ctx.fill();
+
+      // Horizontal White Stripe running near the bottom
+      ctx.fillRect(22, 228, 1156, 13);
+
+      // Bold Italic Red 'ATR' (#EE2722) with thick white outline
+      ctx.save();
+      ctx.font = 'italic 900 185px "Arial Black", Impact, Arial, sans-serif';
+      ctx.textBaseline = 'alphabetic';
+      ctx.lineJoin = 'round';
+      ctx.miterLimit = 2;
+      ctx.lineWidth = 24;
+      ctx.strokeStyle = '#FFFFFF';
+      ctx.strokeText('ATR', 162, 208);
+
+      ctx.fillStyle = '#EE2722';
+      ctx.fillText('ATR', 162, 208);
+      ctx.restore();
+
+      // Bold Italic White 'LOGÍSTICA'
+      ctx.save();
+      ctx.font = 'italic 900 112px "Arial Black", Arial, sans-serif';
+      ctx.fillStyle = '#FFFFFF';
+      ctx.textBaseline = 'alphabetic';
+      ctx.fillText('LOGÍSTICA', 575, 205);
+      ctx.restore();
+
+      return canvas.toDataURL('image/png');
+    }
+
+    // =========================================================================
+    // 2. CHECKLIST DATA DEFINITIONS (EXACT EXTRACTION FROM PROVIDED PDFs)
     // =========================================================================
     const CHECKLIST_TEMPLATES = {
       RTG: {
@@ -484,7 +575,7 @@
         title: "Vistoria 'CheckList - RTG'",
         pdfTitle: 'CHECK LIST - RTG',
         docCode: 'ATR 8.5.04A REV00',
-        company: 'NAVEGAÇÃO • GRUPO CHO',
+        company: 'ATR Logística',
         equipLabel: 'Nº RTG',
         equipPlaceholder: 'Ex: RTG-01',
         hasSeverity: false,
@@ -571,7 +662,7 @@
         title: "Vistoria 'Empilhadeira de Cheio'",
         pdfTitle: 'CHECK LIST - TEREX / REACH STACKER',
         docCode: 'ALFA 8.5.04E / Rev.00',
-        company: 'NAVEGAÇÃO - TRANSPORTE - LOGÍSTICA • GRUPO CHO',
+        company: 'ATR Logística',
         equipLabel: 'Nº Reach Stacker',
         equipPlaceholder: 'Ex: RS-04',
         hasSeverity: true,
@@ -615,7 +706,7 @@
     };
 
     // =========================================================================
-    // 2. APPLICATION STATE
+    // 3. APPLICATION STATE
     // =========================================================================
     let state = {
       type: null, // 'RTG' | 'RS'
@@ -642,7 +733,7 @@
     const signaturePads = {};
 
     // =========================================================================
-    // 3. INITIALIZATION & NAVIGATION
+    // 4. INITIALIZATION & NAVIGATION
     // =========================================================================
     window.addEventListener('DOMContentLoaded', () => {
       initSignatureCanvases();
@@ -664,12 +755,10 @@
       const template = CHECKLIST_TEMPLATES[type];
       if (!template) return;
 
-      // Get current date & time
       const now = new Date();
       const dateStr = now.toISOString().split('T')[0];
       const timeStr = now.toTimeString().slice(0, 5);
 
-      // Reset state
       state = {
         type: type,
         header: {
@@ -688,7 +777,6 @@
         }
       };
 
-      // Build flat items list & initialize state per item
       flatItemsList = [];
       let globalIdx = 0;
       template.sections.forEach(sec => {
@@ -705,21 +793,11 @@
         });
       });
 
-      // Update Header UI
       document.getElementById('header-title').textContent = template.title;
       document.getElementById('btn-back').classList.remove('hidden');
       document.getElementById('header-actions').classList.remove('hidden');
       document.getElementById('progress-container').classList.remove('hidden');
 
-      // Show/Hide RTG Mandatory Safety Banner
-      const rtgAlert = document.getElementById('rtg-alert-banner');
-      if (type === 'RTG') {
-        rtgAlert.classList.remove('hidden');
-      } else {
-        rtgAlert.classList.add('hidden');
-      }
-
-      // Populate identification inputs
       document.getElementById('label-equipamento').textContent = template.equipLabel;
       const eqInput = document.getElementById('input-equipamento');
       eqInput.value = '';
@@ -731,23 +809,17 @@
       document.getElementById('input-horario').value = timeStr;
       document.getElementById('input-obs-geral').value = '';
 
-      // Reset Turno buttons
       ['1º', '2º', '3º'].forEach(t => {
         const btn = document.getElementById(`btn-turno-${t}`);
         btn.classList.remove('turno-btn-active');
       });
 
-      // Reset General Photos preview
       renderGeneralPhotos();
-
-      // Render Checklist Cards
       renderChecklistCards(template);
 
-      // Switch views
       document.getElementById('view-home').classList.add('hidden');
       document.getElementById('view-form').classList.remove('hidden');
 
-      // Resize & clear signature pad after view becomes visible
       setTimeout(() => {
         resizeAllSignatureCanvases();
         clearSignature('operador');
@@ -758,7 +830,7 @@
     }
 
     // =========================================================================
-    // 4. FORM RENDERING & INTERACTIONS
+    // 5. FORM RENDERING & INTERACTIONS
     // =========================================================================
     function renderChecklistCards(template) {
       const container = document.getElementById('checklist-items-container');
@@ -767,9 +839,8 @@
       let globalIdx = 0;
 
       template.sections.forEach(section => {
-        // Section Header Card (Matches Modelo 1: "1- Itens de Segurança - (NÃO RESPONDA)")
         const secCard = document.createElement('div');
-        secCard.className = 'modall-card p-4 border-l-4 border-[#00796B]';
+        secCard.className = 'modall-card p-4 border-l-4 border-[#0D8A72]';
         secCard.innerHTML = `
           <div class="flex items-center justify-between">
             <h3 class="text-sm font-bold text-gray-800">${section.title} <span class="text-gray-400 font-normal text-xs">- (NÃO RESPONDA)</span></h3>
@@ -778,7 +849,6 @@
         `;
         container.appendChild(secCard);
 
-        // Item Cards
         section.items.forEach(itemLabel => {
           const idx = globalIdx;
           const card = document.createElement('div');
@@ -786,13 +856,11 @@
           card.className = 'modall-card p-4 transition-all';
 
           card.innerHTML = `
-            <!-- Item Title & Required Asterisk -->
             <div class="flex justify-between items-start gap-2 mb-3">
               <p class="text-[15px] font-medium text-gray-700 leading-snug">${itemLabel}</p>
               <span class="text-red-600 font-bold text-base leading-none shrink-0">*</span>
             </div>
 
-            <!-- 3 Status Buttons: CONFORME | NÃO CONFORME | N/A NÃO APLICÁVEL -->
             <div class="grid grid-cols-3 gap-2 mb-3">
               <button type="button" id="btn-status-${idx}-C" onclick="setItemStatus(${idx}, 'C')" class="status-btn-default py-3 px-1 flex flex-col items-center justify-center gap-1">
                 <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2.8" viewBox="0 0 24 24">
@@ -814,7 +882,6 @@
               </button>
             </div>
 
-            <!-- Reach Stacker Severity Selector (Shown only when RS + NÃO CONFORME) -->
             ${template.hasSeverity ? `
               <div id="severity-box-${idx}" class="hidden mb-3 p-3 rounded-xl bg-red-50 border border-red-200">
                 <div class="flex items-center justify-between mb-2">
@@ -828,15 +895,12 @@
               </div>
             ` : ''}
 
-            <!-- Inline Comment Box (Toggled by Comentário button) -->
             <div id="comment-box-${idx}" class="hidden mb-3">
               <input type="text" id="input-comment-${idx}" placeholder="Descreva a observação ou anomalia..." class="modall-underline-input text-sm" oninput="updateItemComment(${idx}, this.value)">
             </div>
 
-            <!-- Photo Thumbnails Grid (Up to 5 photos) -->
             <div id="photos-preview-${idx}" class="hidden grid grid-cols-5 gap-2 mb-3"></div>
 
-            <!-- Bottom Sub-Action Buttons: Comentário | Foto -->
             <div class="grid grid-cols-2 gap-2.5">
               <button type="button" id="btn-comment-toggle-${idx}" onclick="toggleItemComment(${idx})" class="modall-sub-btn py-2.5 px-3 flex items-center justify-center gap-2">
                 <svg class="w-5 h-5 text-gray-600" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
@@ -892,7 +956,6 @@
     function setItemStatus(idx, status) {
       state.items[idx].status = status;
 
-      // Reset button styles
       ['C', 'NC', 'NA'].forEach(s => {
         const btn = document.getElementById(`btn-status-${idx}-${s}`);
         btn.classList.remove('status-btn-conforme', 'status-btn-nc', 'status-btn-na');
@@ -903,7 +966,6 @@
       if (status === 'NC') activeBtn.classList.add('status-btn-nc');
       if (status === 'NA') activeBtn.classList.add('status-btn-na');
 
-      // Handle Reach Stacker Severity box
       const sevBox = document.getElementById(`severity-box-${idx}`);
       if (sevBox) {
         if (status === 'NC') {
@@ -918,7 +980,6 @@
         }
       }
 
-      // Automatically open comment input when marked Não Conforme for convenience
       if (status === 'NC' && !state.items[idx].showComment) {
         toggleItemComment(idx, true);
       }
@@ -963,9 +1024,9 @@
       state.items[idx].comment = text;
       const btn = document.getElementById(`btn-comment-toggle-${idx}`);
       if (text.trim().length > 0) {
-        btn.classList.add('text-[#00796B]', 'bg-[#00796B]/10');
+        btn.classList.add('text-[#0D8A72]', 'bg-[#0D8A72]/10');
       } else {
-        btn.classList.remove('text-[#00796B]', 'bg-[#00796B]/10');
+        btn.classList.remove('text-[#0D8A72]', 'bg-[#0D8A72]/10');
       }
     }
 
@@ -982,9 +1043,7 @@
       document.getElementById('progress-bar').style.width = `${pct}%`;
     }
 
-    // Quick-fill helper for rapid testing/demo
     function quickFillTest() {
-      const template = CHECKLIST_TEMPLATES[state.type];
       if (!state.header.equipamento) {
         const val = state.type === 'RTG' ? 'RTG-03' : 'RS-02';
         document.getElementById('input-equipamento').value = val;
@@ -1012,7 +1071,7 @@
     }
 
     // =========================================================================
-    // 5. PHOTO UPLOAD (MAX 5 PHOTOS PER ITEM + CANVAS COMPRESSION)
+    // 6. PHOTO UPLOAD (MAX 5 PHOTOS PER ITEM + CANVAS COMPRESSION)
     // =========================================================================
     function triggerPhotoUpload(target) {
       const currentPhotos = target === 'general'
@@ -1112,7 +1171,6 @@
         return;
       }
 
-      // Highlight camera icon in red when photos exist
       iconEl.classList.remove('text-gray-800');
       iconEl.classList.add('text-red-600');
       labelEl.classList.add('text-red-600');
@@ -1188,7 +1246,7 @@
     }
 
     // =========================================================================
-    // 6. DIGITAL SIGNATURE CANVAS (TOUCH & MOUSE SUPPORT)
+    // 7. DIGITAL SIGNATURE CANVAS (TOUCH & MOUSE SUPPORT)
     // =========================================================================
     function initSignatureCanvases() {
       ['operador'].forEach(role => {
@@ -1293,12 +1351,11 @@
     }
 
     // =========================================================================
-    // 7. VALIDATION, SAVE & PDF GENERATION (jsPDF + AutoTable)
+    // 8. VALIDATION, SAVE & PDF GENERATION (jsPDF + AutoTable)
     // =========================================================================
     function validateAndSave() {
       const template = CHECKLIST_TEMPLATES[state.type];
 
-      // 1. Validate Identification fields
       if (!state.header.equipamento.trim()) {
         return highlightAndScroll('card-equipamento', `Informe o ${template.equipLabel}.`);
       }
@@ -1315,7 +1372,6 @@
         return highlightAndScroll('card-turno', 'Selecione o Turno (1º, 2º ou 3º).');
       }
 
-      // 2. Validate Checklist Items
       for (let i = 0; i < flatItemsList.length; i++) {
         const itemState = state.items[i];
         if (!itemState.status) {
@@ -1326,23 +1382,17 @@
         }
       }
 
-      // 3. Validate Operator Signature
       if (!state.signatures.operador) {
         return highlightAndScroll('card-sig-operador', 'A assinatura do Operador / Responsável é obrigatória.');
       }
 
-      // Build complete snapshot record
       const record = buildInspectionRecord();
-
-      // Save to localStorage history
       saveToHistory(record);
 
-      // Generate PDF Blob
       const pdfResult = createChecklistPDF(record);
       currentGeneratedPdfBlob = pdfResult.blob;
       currentGeneratedPdfFilename = pdfResult.filename;
 
-      // Populate & Show Completion Modal
       showCompletionModal(record);
     }
 
@@ -1382,7 +1432,7 @@
         type: state.type,
         pdfTitle: template.pdfTitle,
         docCode: template.docCode,
-        company: template.company,
+        company: 'ATR Logística',
         equipLabel: template.equipLabel,
         hasSeverity: template.hasSeverity,
         header: { ...state.header },
@@ -1401,84 +1451,81 @@
       const pageHeight = doc.internal.pageSize.getHeight();
       const margin = 12;
 
-      // --- HEADER BANNER ---
-      doc.setFillColor(0, 121, 107); // #00796B
-      doc.rect(margin, 10, pageWidth - margin * 2, 18, 'F');
+      // --- HEADER BANNER WITH OFFICIAL ATR LOGÍSTICA LOGO ---
+      doc.setFillColor(13, 138, 114); // #0D8A72
+      doc.rect(margin, 10, pageWidth - margin * 2, 20, 'F');
 
+      // Embed the crisp high-res official ATR Logística logo on the left
+      try {
+        const logoDataUrl = getOfficialATRLogoDataURL();
+        // Aspect ratio 1200:310 (~3.87:1) -> 54mm x 14mm
+        doc.addImage(logoDataUrl, 'PNG', margin + 3, 13, 54, 14);
+      } catch (e) {
+        console.warn('Erro ao renderizar logo no PDF:', e);
+      }
+
+      // Document Title & Company Name centered/aligned next to logo
       doc.setTextColor(255, 255, 255);
       doc.setFont('helvetica', 'bold');
-      doc.setFontSize(13);
-      doc.text(data.pdfTitle, margin + 4, 18);
+      doc.setFontSize(11.5);
+      doc.text(data.pdfTitle, margin + 61, 18.5);
 
       doc.setFont('helvetica', 'normal');
       doc.setFontSize(8.5);
-      doc.text(data.company, margin + 4, 24);
+      doc.text('ATR Logística', margin + 61, 24.5);
 
+      // Document Code & System label on the right
       doc.setFont('helvetica', 'bold');
-      doc.setFontSize(9);
-      doc.text(data.docCode, pageWidth - margin - 4, 18, { align: 'right' });
+      doc.setFontSize(8.5);
+      doc.text(data.docCode, pageWidth - margin - 4, 18.5, { align: 'right' });
       doc.setFont('helvetica', 'normal');
-      doc.setFontSize(8);
-      doc.text('Modall Check Digital', pageWidth - margin - 4, 24, { align: 'right' });
+      doc.setFontSize(7.5);
+      doc.text('Modall Check Digital', pageWidth - margin - 4, 24.5, { align: 'right' });
 
       // --- IDENTIFICATION METADATA BOX ---
       const formattedDate = data.header.data.split('-').reverse().join('/');
       doc.setDrawColor(180, 180, 180);
       doc.setFillColor(248, 250, 250);
-      doc.rect(margin, 30, pageWidth - margin * 2, 20, 'FD');
+      doc.rect(margin, 32, pageWidth - margin * 2, 20, 'FD');
 
       doc.setTextColor(33, 33, 33);
       doc.setFontSize(8.5);
 
       // Row 1
       doc.setFont('helvetica', 'bold');
-      doc.text(`${data.equipLabel}:`, margin + 3, 36);
+      doc.text(`${data.equipLabel}:`, margin + 3, 38);
       doc.setFont('helvetica', 'normal');
-      doc.text(String(data.header.equipamento), margin + 33, 36);
+      doc.text(String(data.header.equipamento), margin + 33, 38);
 
       doc.setFont('helvetica', 'bold');
-      doc.text('Data:', margin + 78, 36);
+      doc.text('Data:', margin + 78, 38);
       doc.setFont('helvetica', 'normal');
-      doc.text(formattedDate, margin + 88, 36);
+      doc.text(formattedDate, margin + 88, 38);
 
       doc.setFont('helvetica', 'bold');
-      doc.text('Horário:', margin + 118, 36);
+      doc.text('Horário:', margin + 118, 38);
       doc.setFont('helvetica', 'normal');
-      doc.text(data.header.horario, margin + 132, 36);
+      doc.text(data.header.horario, margin + 132, 38);
 
       doc.setFont('helvetica', 'bold');
-      doc.text('Turno:', margin + 153, 36);
+      doc.text('Turno:', margin + 153, 38);
       doc.setFont('helvetica', 'normal');
-      doc.text(data.header.turno, margin + 165, 36);
+      doc.text(data.header.turno, margin + 165, 38);
 
       // Row 2
       doc.setFont('helvetica', 'bold');
-      doc.text('Operador:', margin + 3, 44);
+      doc.text('Operador:', margin + 3, 46);
       doc.setFont('helvetica', 'normal');
-      doc.text(String(data.header.operador), margin + 20, 44);
+      doc.text(String(data.header.operador), margin + 20, 46);
 
       doc.setFont('helvetica', 'bold');
-      doc.text('Horímetro:', margin + 118, 44);
+      doc.text('Horímetro:', margin + 118, 46);
       doc.setFont('helvetica', 'normal');
-      doc.text(String(data.header.horimetro), margin + 136, 44);
+      doc.text(String(data.header.horimetro), margin + 136, 46);
 
-      let currentY = 53;
+      let currentY = 55;
 
-      // --- RTG MANDATORY WARNING BOX ---
-      if (data.type === 'RTG') {
-        doc.setFillColor(254, 243, 199);
-        doc.setDrawColor(217, 119, 6);
-        doc.rect(margin, currentY, pageWidth - margin * 2, 11, 'FD');
-        doc.setTextColor(120, 53, 15);
-        doc.setFont('helvetica', 'bold');
-        doc.setFontSize(7.5);
-        const warnLines = doc.splitTextToSize(
-          'ATENÇÃO: Fica estabelecido que o Operador do equipamento tem o direito e o dever de não operar em caso de identificação de pelo menos 01 item NÃO CONFORME (N.C).',
-          pageWidth - margin * 2 - 6
-        );
-        doc.text(warnLines, margin + 3, currentY + 4.5);
-        currentY += 14;
-      }
+      // NOTE: Per user requirement, the "ATENÇÃO" warning banner is intentionally omitted from the PDF.
 
       // --- ITEMS TABLE ---
       const tableBody = [];
@@ -1487,7 +1534,7 @@
       data.items.forEach((item, idx) => {
         if (data.type === 'RTG' && item.section !== lastSection) {
           lastSection = item.section;
-          const colSpan = data.hasSeverity ? 5 : 4;
+          const colSpan = data.hasSeverity ? 4 : 3;
           tableBody.push([{
             content: item.section.toUpperCase(),
             colSpan: colSpan,
@@ -1540,7 +1587,7 @@
         margin: { left: margin, right: margin },
         theme: 'grid',
         headStyles: {
-          fillColor: [0, 121, 107],
+          fillColor: [13, 138, 114],
           textColor: [255, 255, 255],
           fontStyle: 'bold',
           fontSize: 8
@@ -1656,7 +1703,7 @@
         doc.addPage();
         let photoY = 15;
 
-        doc.setFillColor(0, 121, 107);
+        doc.setFillColor(13, 138, 114);
         doc.rect(margin, photoY, pageWidth - margin * 2, 10, 'F');
         doc.setTextColor(255, 255, 255);
         doc.setFont('helvetica', 'bold');
@@ -1706,7 +1753,7 @@
         doc.setFontSize(7.5);
         doc.setTextColor(130, 130, 130);
         doc.text(
-          `Gerado via Modall Check • ${formattedDate} ${data.header.horario} • Página ${p} de ${totalPages}`,
+          `ATR Logística • Modall Check • ${formattedDate} ${data.header.horario} • Página ${p} de ${totalPages}`,
           pageWidth / 2,
           pageHeight - 6,
           { align: 'center' }
@@ -1743,7 +1790,7 @@
     }
 
     // =========================================================================
-    // 8. PDF SHARING (WEB SHARE API) & DOWNLOAD
+    // 9. PDF SHARING (WEB SHARE API) & DOWNLOAD
     // =========================================================================
     async function shareGeneratedPDF() {
       if (!currentGeneratedPdfBlob) return;
@@ -1755,7 +1802,7 @@
       if (navigator.canShare && navigator.canShare({ files: [pdfFile] })) {
         try {
           await navigator.share({
-            title: 'Relatório Modall Check',
+            title: 'Relatório Modall Check - ATR Logística',
             text: `Check-list digital concluído: ${currentGeneratedPdfFilename}`,
             files: [pdfFile]
           });
@@ -1787,7 +1834,7 @@
     }
 
     // =========================================================================
-    // 9. LOCAL STORAGE HISTORY
+    // 10. LOCAL STORAGE HISTORY
     // =========================================================================
     const HISTORY_KEY = 'modall_check_history_v1';
 
@@ -1836,7 +1883,7 @@
           <div class="modall-card p-4 flex items-center justify-between gap-3">
             <div class="min-w-0 flex-1">
               <div class="flex items-center gap-2">
-                <span class="text-[11px] font-bold px-2 py-0.5 rounded bg-[#00796B]/10 text-[#00796B]">${rec.type}</span>
+                <span class="text-[11px] font-bold px-2 py-0.5 rounded bg-[#0D8A72]/10 text-[#0D8A72]">${rec.type}</span>
                 <span class="text-sm font-bold text-gray-800 truncate">${rec.header.equipamento}</span>
                 ${hasNC
                   ? `<span class="text-[10px] font-bold px-1.5 py-0.5 rounded bg-red-100 text-red-700">${rec.counts.nc} N/C</span>`
@@ -1852,7 +1899,7 @@
                   <path d="M18 16.08c-.76 0-1.44.3-1.96.77L8.91 12.7c.05-.23.09-.46.09-.7s-.04-.47-.09-.7l7.05-4.11c.54.5 1.25.81 2.04.81 1.66 0 3-1.34 3-3s-1.34-3-3-3-3 1.34-3 3c0 .24.04.47.09.7L8.04 9.81C7.5 9.31 6.79 9 6 9c-1.66 0-3 1.34-3 3s1.34 3 3 3c.79 0 1.5-.31 2.04-.81l7.12 4.16c-.05.21-.08.43-.08.65 0 1.61 1.31 2.92 2.92 2.92s2.92-1.31 2.92-2.92c0-1.61-1.31-2.92-2.92-2.92z"/>
                 </svg>
               </button>
-              <button onclick="reopenHistoryPDF(${idx}, 'download')" title="Baixar PDF" class="p-2.5 rounded-xl bg-[#00796B]/10 text-[#00796B] hover:bg-[#00796B]/20 active:scale-95 transition">
+              <button onclick="reopenHistoryPDF(${idx}, 'download')" title="Baixar PDF" class="p-2.5 rounded-xl bg-[#0D8A72]/10 text-[#0D8A72] hover:bg-[#0D8A72]/20 active:scale-95 transition">
                 <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24">
                   <path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/>
                 </svg>
@@ -1890,7 +1937,7 @@
     }
 
     // =========================================================================
-    // 10. CUSTOM TOAST NOTIFICATION (REPLACES alert())
+    // 11. CUSTOM TOAST NOTIFICATION (REPLACES alert())
     // =========================================================================
     let toastTimeout = null;
     function showToast(message, type = 'info') {
