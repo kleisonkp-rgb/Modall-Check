@@ -217,8 +217,7 @@
         </div>
         <div class="flex-1 min-w-0">
           <div class="flex items-center gap-2">
-            <span class="text-[11px] font-bold px-2 py-0.5 rounded bg-[#0D8A72]/15 text-[#0D8A72]">ATR 8.5.04A REV00</span>
-            <span class="text-[11px] font-medium text-gray-400">45 itens</span>
+            <span class="text-[11px] font-bold px-2 py-0.5 rounded bg-[#0D8A72]/15 text-[#0D8A72]">45 itens</span>
           </div>
           <h3 class="text-lg font-bold text-gray-800 mt-1">Check List - RTG</h3>
           <p class="text-xs text-gray-500 mt-0.5">Pórtico sobre Pneus • Segurança, Térreo, Ergonomia, Operacional e Spread</p>
@@ -237,10 +236,9 @@
         </div>
         <div class="flex-1 min-w-0">
           <div class="flex items-center gap-2">
-            <span class="text-[11px] font-bold px-2 py-0.5 rounded bg-[#0D8A72]/15 text-[#0D8A72]">ALFA 8.5.04E / Rev.00</span>
-            <span class="text-[11px] font-medium text-gray-400">29 itens</span>
+            <span class="text-[11px] font-bold px-2 py-0.5 rounded bg-[#0D8A72]/15 text-[#0D8A72]">29 itens</span>
           </div>
-          <h3 class="text-lg font-bold text-gray-800 mt-1 leading-snug">Check List - Empilhadeira de Cheio / Reach Stacker</h3>
+          <h3 class="text-lg font-bold text-gray-800 mt-1 leading-snug">Check List - Empilhadeira de Cheio (Reach Stacker)</h3>
           <p class="text-xs text-gray-500 mt-0.5">Terex / Reach Stacker • Com classificação de gravidade (Leve, Médio, Grave)</p>
         </div>
         <svg class="w-6 h-6 text-gray-400 group-hover:text-[#0D8A72] shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
@@ -492,89 +490,13 @@
 
   <script>
     // =========================================================================
-    // 1. OFFICIAL ATR LOGÍSTICA HIGH-RES LOGO GENERATOR (FOR PDF EMBEDDING)
-    // =========================================================================
-    // Renders the exact official ATR LOGÍSTICA logo onto a high-DPI HTML5 Canvas
-    // (Royal Blue #212A9C angled banner, two diagonal white stripes, horizontal
-    // white bottom bar, italic red #EE2722 'ATR' with thick white stroke, and
-    // italic white 'LOGÍSTICA') so jsPDF embeds it crisply on every report.
-    function getOfficialATRLogoDataURL() {
-      const canvas = document.createElement('canvas');
-      canvas.width = 1200;
-      canvas.height = 310;
-      const ctx = canvas.getContext('2d');
-
-      // White background card so it stands out cleanly on any header bar
-      ctx.fillStyle = '#FFFFFF';
-      ctx.fillRect(0, 0, canvas.width, canvas.height);
-
-      // Royal Blue Angled-Left Banner (#212A9C)
-      ctx.fillStyle = '#212A9C';
-      ctx.beginPath();
-      ctx.moveTo(92, 22);
-      ctx.lineTo(1178, 22);
-      ctx.lineTo(1178, 288);
-      ctx.lineTo(22, 288);
-      ctx.closePath();
-      ctx.fill();
-
-      // Two Diagonal White Stripes cutting through the left side
-      ctx.fillStyle = '#FFFFFF';
-      // Stripe 1
-      ctx.beginPath();
-      ctx.moveTo(110, 22);
-      ctx.lineTo(132, 22);
-      ctx.lineTo(62, 288);
-      ctx.lineTo(40, 288);
-      ctx.closePath();
-      ctx.fill();
-
-      // Stripe 2
-      ctx.beginPath();
-      ctx.moveTo(148, 22);
-      ctx.lineTo(170, 22);
-      ctx.lineTo(100, 288);
-      ctx.lineTo(78, 288);
-      ctx.closePath();
-      ctx.fill();
-
-      // Horizontal White Stripe running near the bottom
-      ctx.fillRect(22, 228, 1156, 13);
-
-      // Bold Italic Red 'ATR' (#EE2722) with thick white outline
-      ctx.save();
-      ctx.font = 'italic 900 185px "Arial Black", Impact, Arial, sans-serif';
-      ctx.textBaseline = 'alphabetic';
-      ctx.lineJoin = 'round';
-      ctx.miterLimit = 2;
-      ctx.lineWidth = 24;
-      ctx.strokeStyle = '#FFFFFF';
-      ctx.strokeText('ATR', 162, 208);
-
-      ctx.fillStyle = '#EE2722';
-      ctx.fillText('ATR', 162, 208);
-      ctx.restore();
-
-      // Bold Italic White 'LOGÍSTICA'
-      ctx.save();
-      ctx.font = 'italic 900 112px "Arial Black", Arial, sans-serif';
-      ctx.fillStyle = '#FFFFFF';
-      ctx.textBaseline = 'alphabetic';
-      ctx.fillText('LOGÍSTICA', 575, 205);
-      ctx.restore();
-
-      return canvas.toDataURL('image/png');
-    }
-
-    // =========================================================================
-    // 2. CHECKLIST DATA DEFINITIONS (EXACT EXTRACTION FROM PROVIDED PDFs)
+    // 2. CHECKLIST DATA DEFINITIONS (WITHOUT TRACEABILITY/REVISION CODES)
     // =========================================================================
     const CHECKLIST_TEMPLATES = {
       RTG: {
         id: 'RTG',
         title: "Vistoria 'CheckList - RTG'",
         pdfTitle: 'CHECK LIST - RTG',
-        docCode: 'ATR 8.5.04A REV00',
         company: 'ATR Logística',
         equipLabel: 'Nº RTG',
         equipPlaceholder: 'Ex: RTG-01',
@@ -590,16 +512,16 @@
               'Iluminação Operacional no período Noturno',
               'Sirene de Translação',
               'Grade de Proteção de Pneus',
-              'Vazamento de Óleo contínuo (Descrever na observação)',
+              'Vazamento de Óleo contínuo',
               'Bigode de Anti Colisão'
             ]
           },
           {
             title: '2- Itens de Equipamento no Térreo',
             items: [
-              'Área da Faixa Operacional Desimpedida?',
-              'Há alguma Avaria? (Descrever no campo de Observações)',
-              'Retiradas as Ancoragens?',
+              'Área da Faixa Operacional Desimpedido?',
+              'Há alguma Avarias?',
+              'Retirada as Ancoragens?',
               'Motores de Translação',
               'Bombas de Giro dos Pneus',
               'Bateria'
@@ -608,7 +530,7 @@
           {
             title: '3- Itens de Ergonomia',
             items: [
-              'Acesso / Escada / Guarda Corpo',
+              'Acesso/Escada/Guarda Corpo',
               'Banco do Operador',
               'Limpeza da Cabine',
               'Limpeza dos Vidros',
@@ -639,7 +561,7 @@
             title: '5- Itens Spread',
             items: [
               'Guias de Canto',
-              'Abertura / Fechamento'
+              'Abertura/Fechamento'
             ]
           },
           {
@@ -647,11 +569,12 @@
             items: [
               'Condições dos Pneus',
               'Balança dos Pneus',
+              'Translação (Balança/Sistema)',
               'Limpeza da Casa do Motor e Gerador',
-              'Translação',
+              'Translação (Geral)',
               'Calços dos Pneus',
               'Tablet',
-              'Cabo USB / Carregador',
+              'Cabo USB/Carregador',
               'Rádio de Comunicação'
             ]
           }
@@ -660,8 +583,7 @@
       RS: {
         id: 'RS',
         title: "Vistoria 'Empilhadeira de Cheio'",
-        pdfTitle: 'CHECK LIST - TEREX / REACH STACKER',
-        docCode: 'ALFA 8.5.04E / Rev.00',
+        pdfTitle: 'CHECK LIST - EMPILHADEIRA DE CHEIO (REACH STACKER)',
         company: 'ATR Logística',
         equipLabel: 'Nº Reach Stacker',
         equipPlaceholder: 'Ex: RS-04',
@@ -697,7 +619,7 @@
               'Radiador',
               'Nível de Água',
               'Tablet',
-              'Cabo USB / Carregador do Tablet',
+              'Cabo USB/ Carregador do Tablet',
               'Rádio de Comunicação'
             ]
           }
@@ -1431,7 +1353,6 @@
         createdAt: new Date().toISOString(),
         type: state.type,
         pdfTitle: template.pdfTitle,
-        docCode: template.docCode,
         company: 'ATR Logística',
         equipLabel: template.equipLabel,
         hasSeverity: template.hasSeverity,
@@ -1464,23 +1385,15 @@
         console.warn('Erro ao renderizar logo no PDF:', e);
       }
 
-      // Document Title & Company Name centered/aligned next to logo
+      // Document Title & Company Name (without any traceability/revision code)
       doc.setTextColor(255, 255, 255);
       doc.setFont('helvetica', 'bold');
-      doc.setFontSize(11.5);
+      doc.setFontSize(10.5);
       doc.text(data.pdfTitle, margin + 61, 18.5);
 
       doc.setFont('helvetica', 'normal');
       doc.setFontSize(8.5);
-      doc.text('ATR Logística', margin + 61, 24.5);
-
-      // Document Code & System label on the right
-      doc.setFont('helvetica', 'bold');
-      doc.setFontSize(8.5);
-      doc.text(data.docCode, pageWidth - margin - 4, 18.5, { align: 'right' });
-      doc.setFont('helvetica', 'normal');
-      doc.setFontSize(7.5);
-      doc.text('Modall Check Digital', pageWidth - margin - 4, 24.5, { align: 'right' });
+      doc.text('ATR Logística • Inspeção Digital', margin + 61, 24.5);
 
       // --- IDENTIFICATION METADATA BOX ---
       const formattedDate = data.header.data.split('-').reverse().join('/');
